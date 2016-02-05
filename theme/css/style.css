@@ -1,0 +1,381 @@
+html {
+    overflow-y: scroll;
+}
+
+body {
+    padding: 0;
+}
+a.as-text {
+    color: #333;
+}
+a:hover.as-text {
+    color: #333;
+    text-decoration: none;
+}
+
+
+
+/* Logo místo textu. Při vhodném místě se zobrazí i span. */
+.navbar .navbar-brand {
+    line-height: 50px;
+    padding: 0 20px 0 10px;
+}
+
+.navbar .navbar-brand img {
+    float: left; /*kvuli spanu*/
+    position: relative;
+    top: 11px;
+}
+.navbar .navbar-brand:before {
+    content: "beta";
+    position: absolute;
+    font-size: 9px;
+    margin-top: 17px;
+    margin-left: -16px;
+}
+.navbar .navbar-brand span {
+    display: inline;
+    padding-left: 10px;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .navbar .navbar-brand:before {
+        margin-left: 21px;
+    }
+
+    .navbar .navbar-brand span {
+        display: none;
+    }
+
+    .navbar .navbar-brand img {
+        left: 9px;
+    }
+}
+@media (max-width: 285px) { /* velikost navbaru se zobrazenym spanem */
+    .navbar .navbar-brand span {
+        display: none;
+    }
+
+    .navbar .navbar-brand:before {
+        margin-left: 11px;
+    }
+}
+
+.navbar {
+    z-index: 1000;
+}
+.navbar .navbar-user .dropdown-toggle {
+    padding: 0 5px 0 15px;
+    line-height: 50px;
+}
+@media (min-width: 768px) {
+    .navbar .navbar-user  {
+        margin-left: 10px;
+    }
+}
+.navbar .facebook-like {
+    float: right;
+    padding: 15px 0 5px 0;
+}
+
+
+
+
+#map-container {
+    position:fixed;
+    top: 50px; bottom: 0;
+    right: 0; left: 0;
+    z-index: 1;
+}
+.sidebar-inner {padding: 15px;}
+#map-container .close {font-size: 300%;}
+#map {
+    height: 100%;
+}
+#map-sidebar, #map-layers {
+    z-index: 3000;
+    max-width: 250px;
+    display: block;
+    background: rgba(255,255,255,0.6);
+    font-size: 130%;
+
+    position: absolute;
+    height: 100%;
+    overflow-y: scroll;
+}
+#map-layers {
+    right:0;
+    width: 250px;
+    text-align: right;
+}
+
+@media screen and (min-width: 768px) {
+    #map-sidebar, #map-layers {
+        position: relative;
+        float: left;
+        height: 100%;
+        overflow: auto;
+    }
+    #map-layers {
+        float: right;
+    }
+
+}
+
+/* temporary solution, may be implemented as L.control */
+#map-searchbar {
+    position: absolute;
+    background: rgba(255,255,255,0.95);
+    z-index: 1010;
+    min-height: 60px;
+    max-height: 100%;
+    min-width: 250px;
+    max-width: 350px;
+    border-bottom-right-radius: 5px;
+    overflow: hidden;
+    overflow-y: auto;
+    padding: 10px;
+
+    display: none;
+}
+#map-container.searchbar-on .leaflet-top.leaflet-left {
+    margin-top: 60px;
+}
+#map-container.searchbar-on #map-searchbar {
+    display: block;
+}
+#map-searchbar h4, h5 {
+    border-bottom: 1px solid #aaa;
+}
+
+#map-searchbar .osmid {
+    padding-top: 1em;
+    font-size: 90%;
+}
+#map-searchbar .close {
+    margin-top: -6px;
+}
+#map-searchbar #mapillary-photo {
+    max-width: 250px;
+    margin-top: 1em;
+    font-size: 80%;
+    position: relative;
+}
+#map-searchbar #mapillary-photo a:after {
+    content: "Mapillary.com - otevřené street-view";
+    color: #ccc;
+    position: absolute;
+    left: 4px;
+    bottom: 0;
+    text-shadow: 0 0 4px #000;
+
+}
+
+
+
+
+
+#main .container {
+    position:relative;
+    z-index: 5;
+    padding: 1em;
+    background: rgba(255,255,255,0.9);
+    padding-top: 50px;
+    margin-bottom: 260px;
+}
+
+#main .container.splash {
+    background: transparent;
+    padding: .5em;
+    padding-top: 100px;
+    display: none;
+}
+#main .container.splash:before {
+    content: url(../img/info-layer-switch.mini.svg);
+    position: fixed;
+    right: 10px;
+    top: 62px;
+    z-index: 10;
+}
+
+.content-box-left, .content-box-right {
+    padding:0;
+}
+.content-box-inner {
+    background: rgba(255,255,255,0.9);
+    padding: 15px;
+    z-index: 15;
+    position: relative; /*because of z-index*/
+}
+@media screen and (min-width: 992px) {
+    .content-box-left {
+        padding-right: 15px;
+    }
+    .content-box-right {
+        padding-left: 15px;
+
+    }
+
+    #main .container.splash:before {
+        content: url(../img/info-layer-switch.svg);
+        right: 30px;
+        top: 70px;
+    }
+}
+@media screen and (max-width: 767px) {
+    .row {margin: 0;}
+}
+
+
+
+
+
+
+/* Primárně pro účely splashe */
+#main .jumbotron {
+    border-radius: 0;
+    text-align: center;
+    margin-bottom: 0;
+}
+#main .jumbotron.transparent { /* jinde než splash */
+    background: transparent;
+}
+#main .jumbotron .close-overlay {
+    font-size: 60px;
+}
+
+#main .jumbotron h1 img.osmlogo {
+    width: 50px;
+    height: 50px;
+}
+@media screen and (min-width: 768px) {
+    #main .jumbotron {
+        margin-top: 30px;
+    }
+    #main .jumbotron .close-overlay {
+		    margin-right: -20px;
+		}
+    #main .bottom-spacer {
+        margin-bottom: 30px;
+    }
+    #main .jumbotron h1 img.osmlogo {
+        width: 110px;
+        height: 110px;
+    }
+}
+
+
+.twitter-follow, .weekly-follow {
+    float: right;
+    padding-right: 0;
+    font-size: 10px;
+}
+.twitter-follow:before {
+    content: "";
+    background: url('../img/twitter.svg') no-repeat left top;
+    background-size: 16px 16px;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: bottom;
+    margin-right: 1ex;
+}
+
+
+.tweets {
+    list-style-type: none;
+    margin:0;
+    padding: 0;
+}
+.tweets li {
+    padding: 8px 0 8px 60px;
+}
+.tweets.weeklys li {
+    padding-left: 0;
+}
+.tweets .permalink {
+    float: right;
+    font-size: 80%;
+    color: rgb(112, 112, 112);
+    text-decoration: none;
+    line-height: 20px;
+}
+.tweets .author img {
+    position: absolute;
+    margin-left: -60px;
+}
+.tweets .retweet {
+    color: #707070;
+    font-size: 80%;
+    padding: 3px 0 0 3px;
+}
+.tweets .profile {
+    color: rgb(41, 47, 51);
+    font-weight: bold;
+}
+.tweets .profile .nickname {
+    color: rgb(102, 117, 127);
+    font-weight: normal;
+    font-size: 80%;
+}
+.tweets .footer {
+    text-align:right;
+    visibility: hidden;
+}
+.tweets li:hover .footer {visibility: visible;}
+.tweets .footer a {
+    font-size: 80%;
+    padding-left: 5px;
+    color: rgb(153, 153, 153);
+    text-decoration: none;
+}
+
+.konference {
+    width: 100%;
+    margin: 1.5em 0;
+}
+.konference .img {
+    width: 32px;
+}
+.konference .subject {
+    padding: 0.8em 0.6em;
+}
+.konference .date {
+    width: 80px;
+    text-align: right;
+    font-size: 80%;
+}
+
+.load-more {
+    font-size: 80%;
+}
+
+/*3 úroveň menu*/
+#main .nav.nav-tabs {
+    padding-top: 1em;
+}
+#main .nav.nav-tabs a {
+    color: #444;
+}
+
+
+/* Page /komunita */
+.komunita {
+    margin-top: 2em;
+}
+.komunita h3 {
+    margin-top: 10px;
+}
+.komunita a img {
+    margin: 0;
+    display: inline;
+}
+.komunita table {
+    width: 100%;
+}
+.komunita table th {
+    line-height: 2;
+}
+.komunita .caption div {
+	margin: 0 0 4px;
+}
