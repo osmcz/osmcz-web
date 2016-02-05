@@ -8,6 +8,19 @@
 
 common:
 
+    parameters:
+    
+        # extended in data/config.local.neon
+        twitter:
+            consumer_key: x
+            consumer_secret: x
+            access_token: x
+            access_token_secret: x
+
+        plugins:
+            - TwitterPlugin
+
+
 production < common:
 development < common:
 console < common:

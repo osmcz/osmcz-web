@@ -1,0 +1,34 @@
+<ul class="tweets weeklys">
+    {foreach $weeklys as $t}
+        {breakIf $iterations >= $w_limit}
+        <li>
+            <a class="permalink" href="https://twitter.com/{$t[user][screen_name]}/status/{$t[id_str]}">
+                <time title="{$t[created_at]|date:'j.n. H:i'}">{$t[created_at]|timeago}</time>
+            </a>
+
+            <div class="author">
+                <a class="profile" href="{$t[weekly_link]}">
+                    <span class="full-name">Týdeník {$t[weekly_title]}</span>
+                </a>
+            </div>
+
+            <div class="entry-content">
+                <a href="{$t[weekly_link]}" class="as-text">{!$t[weekly_text]}</a>
+                <img src="{$t[entities][media][0][media_url]}" alt="300x200" class="img-responsive"
+                     n:if="@$t[entities][media][0][media_url]">
+            </div>
+
+            <div class="footer" style="margin-top:-8px">
+                <a href="https://twitter.com/intent/tweet?in_reply_to={$t[id_str]}" title="Odpovědět"
+                   target="_blank"><span class="glyphicon glyphicon-share-alt"></span></a>
+                <a href="https://twitter.com/intent/retweet?tweet_id={$t[id_str]}" title="Retweetnout"
+                   target="_blank"><span class="glyphicon glyphicon-retweet"></span> {$t[retweet_count]>0 ? $t[retweet_count]}</a>
+                <a href="https://twitter.com/intent/like?tweet_id={$t[id_str]}" title="Lajknout"
+                   target="_blank"><span class="glyphicon glyphicon-heart"></span> {$t[favorite_count]>0 ? $t[favorite_count]}</a>
+            </div>
+        </li>
+    {/foreach}
+</ul>
+<div class="text-right load-more">
+    <a href="{plink this weeklys=>$w_limit+3}" class="ajax">načíst více</a> | <a href="/weekly" class="">o týdeníku</a>
+</div>

@@ -1,0 +1,39 @@
+<ul class="tweets">
+    {foreach $tweets as $t}
+        {breakIf $iterations >= $limit}
+        <li n:class="isset($t[weekly_link]) ? weekly-tweet">
+            <a class="permalink" href="https://twitter.com/{$t[user][screen_name]}/status/{$t[id_str]}">
+                <time title="{$t[created_at]|date:'j.n. H:i'}">{$t[created_at]|timeago}</time>
+            </a>
+
+            <div class="author">
+                <a class="profile" href="https://twitter.com/{$t[user][screen_name]}">
+                    <img class="avatar" alt=""
+                         src="{$t[user][screen_name] == 'osmcz' ? '/theme/img/osmcz.220x220.png' : $t[user][profile_image_url]}"
+                         width="48" height="48">
+                    <span class="full-name">{$t[user][name]}</span>
+                    <span class="nickname">@{$t[user][screen_name]}</span>
+                </a>
+            </div>
+            <div class="entry-content">
+                {!$t[text]}
+                <div class="retweet" n:if="$t[retweet]"><span class="glyphicon glyphicon-retweet"></span>
+                    Retweetnuto od {$t[orig][user][name]}</div>
+                <img src="{$t[entities][media][0][media_url]}" alt="300x200" class="img-responsive"
+                     n:if="@$t[entities][media][0][media_url]">
+            </div>
+
+            <div class="footer">
+                <a href="https://twitter.com/intent/tweet?in_reply_to={$t[id_str]}" title="Odpovědět"
+                   target="_blank"><span class="glyphicon glyphicon-share-alt"></span></a>
+                <a href="https://twitter.com/intent/retweet?tweet_id={$t[id_str]}" title="Retweetnout"
+                   target="_blank"><span class="glyphicon glyphicon-retweet"></span> {$t[retweet_count]>0 ? $t[retweet_count]}</a>
+                <a href="https://twitter.com/intent/like?tweet_id={$t[id_str]}" title="Lajknout"
+                   target="_blank"><span class="glyphicon glyphicon-heart"></span> {$t[favorite_count]>0 ? $t[favorite_count]}</a>
+            </div>
+        </li>
+    {/foreach}
+</ul>
+<div class="text-right load-more">
+    <a href="{plink this tweets=>$limit+4}" class="ajax">načíst více</a>
+</div>
