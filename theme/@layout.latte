@@ -88,7 +88,9 @@
                             {/if}
                             <span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li><a n:href=":Admin:Admin:">Administrace</a></li>
+                            <li><a n:href=":Admin:Admin:">Administrace webu</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a><b>{$user->id}</b></a></li>
                             <li><a n:href=":Admin:Admin:logout">Odhlášení</a></li>
                         </ul>
                     {else}
