@@ -1,8 +1,23 @@
 <?php
 
+/** Oauth 1.0 authentication
+ *
+ * 1. user goes to /oauth/login
+ * 2. if we have session - just log him
+ * 3. else get login_token
+ * 4. send user to AUTHORIZE_URL with login_token
+ * 5. user returns with ?oauth_token to /oauth/callback
+ * 6. we get new access_token from server
+ * 7. we fetch API_URL user/details to know who is the user
+ *
+ * @author Pavel Zbytovský, zby.cz
+ */
 class Front_OauthPresenter extends Front_BasePresenter
 {
     private $config;
+
+    /** @var OAuth
+     */
     private $oauth;
 
     const REQUEST_TOKEN_URL = 'https://www.openstreetmap.org/oauth/request_token';
@@ -99,6 +114,7 @@ class Front_OauthPresenter extends Front_BasePresenter
             'last_login' => date("Y-m-d H:i:s"),
         );
 
+        // convert xml-nodes to strings
         foreach ($user as &$val)
             $val = strval($val);
 
@@ -118,7 +134,6 @@ class Front_OauthPresenter extends Front_BasePresenter
         $this->user->login(new Identity($user['username'], array($user['webpages'] == 'admin' ? 'admin' : 'user'), $user));
 
         // remove all tokens - TODO if tokens to be used, save them in DB
-        $this->getSession('oauth')->remove();
 
         $this->redirectUrl('//' . $_SERVER['HTTP_HOST'] . $this->getSession('oauth')->back_url);
         //$this->redirect(':Admin:Admin:');
