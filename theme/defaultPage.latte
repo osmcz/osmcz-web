@@ -44,6 +44,9 @@
                 {/if}
 
 
+                {if $page->getMeta('komunita')}
+                    {include inc_komunita.latte}
+                {/if}
                 {if $page->getMeta('zebricek')}
                     {include inc_zebricek.latte}
                 {/if}

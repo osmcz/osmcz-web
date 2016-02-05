@@ -24,6 +24,7 @@ common:
         plugins:
             - OsmAuthPlugin
             - TwitterPlugin
+            - CommunityFormPlugin
 
 
 production < common:

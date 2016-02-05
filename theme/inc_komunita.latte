@@ -1,0 +1,71 @@
+
+<div class="row komunita">
+{foreach dibi::query("SELECT users.*, count(mailarchive.from) talk_cz_mails
+                        FROM users LEFT JOIN mailarchive ON `from` = email
+                        WHERE email != ''
+                        GROUP BY email
+                        ORDER BY fullname") as $r}
+    <div class="col-sm-6 col-md-4">
+        <div class="thumbnail">
+            <img src="{$r->img}" alt="avatar" class="pull-right" width="90">
+            <div class="caption">
+                <h3>
+                    {$r->fullname}
+                    <a n:if="$r->twitter" href="https://twitter.com/{$r->twitter}"><img src="/theme/img/twitter.svg" width="16" alt=""></a>
+                    <a n:if="$r->github" href="https://github.com/{$r->github}"><img src="http://github.com/favicon.ico" width="16" alt=""></a>
+                </h3>
+                <div title="Počet changesetů na osm.org (účet vytvořen {$r->account_created|date:'j.n.Y'})">
+                    <img src="/theme/img/logo-osm.svg" width="16" alt="">
+                    <a href="http://www.openstreetmap.org/user/{$r->username}">{$r->username}</a>
+                    ({$r->changesets} ×)
+                </div>
+                <div title="Počet příspěvků v konferenci talk-cz">
+                    <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                    {!str_replace('@', '&#064;', htmlspecialchars($r->email))}
+                    ({$r->talk_cz_mails} ×)
+                </div>
+                <div n:if="$r->about_me">
+                    {$r->about_me}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {*
+    <div class="col-md-6">
+        <img src="{$r->img}" width="100" class="pull-left">
+
+        <h3>{$r->fullname}</h3>
+
+        <img src="/theme/img/logo-osm.svg" width="16" alt="">
+        <a href="http://www.openstreetmap.org/user/{$r->username}">{$r->username}</a>
+        ({$r->changesets} editací)
+        <br>
+
+        <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+        {!str_replace('@', '&#064;', htmlspecialchars($r->email))}
+        ({$r->talk_cz_mails} příspěvků)
+        <br>
+
+
+        <a href="https://twitter.com/"><img src="/theme/img/twitter.svg" width="16" alt=""></a>
+        <a href="https://github.com/"><img src="http://github.com/favicon.ico" width="16" alt=""></a>
+
+    </div>
+*}
+{/foreach}
+</div>
+
+
+{if $user->isLoggedIn() AND $user->identity->username}
+    <div class="komunita">
+    <h3 id="add-myself">Můj profil na této stránce</h3>
+    {control CommunityFormPlugin}
+    </div>
+    
+{else}
+    <a n:href="Oauth:login backUrl => '/komunita#add-myself'" class="btn btn-default">Přidat svůj profil</a>
+
+{/if}
+
