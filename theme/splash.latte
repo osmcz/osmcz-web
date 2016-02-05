@@ -52,7 +52,7 @@
                 <h2>Konference</h2>
 
                 <table class="konference">
-                    {var $limit = isset($_GET[konf]) ? $_GET[konf] : 5}
+                    {var $limit = isset($_GET[konf]) ? $_GET[konf] : 3}
                     {foreach dibi::query('SELECT * FROM mailarchive ORDER BY date DESC LIMIT %i', $limit) as $r}
                         <tr title="{$r[date]|date:'j.n. H:i'} {$r[name]} ({!$r[from]|replace:'@':'&#64;'})
 {$r[subject]}
@@ -70,6 +70,11 @@
                     <a class="btn btn-sm btn-success" href="/komunita" role="button">Napište nám</a>
                 </p>
 
+            </div>
+
+            {var $splash = PagesModel::getPageById(29)}
+            <div class="content-box-inner bottom-spacer" n:if="$splash->getMeta('show_content')">
+                {!$splash->content}
             </div>
 
             <div class="content-box-inner">
