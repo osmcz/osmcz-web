@@ -122,20 +122,25 @@ class PlancakeEmailParser {
      */
     public function getSubject()
     {
-        if (!isset($this->rawFields['subject']))
+        return $this->getFieldDecoded('subject');
+    }
+
+    public function getFieldDecoded($field)
+    {
+        if (!isset($this->rawFields[$field]))
         {
-            throw new Exception("Couldn't find the subject of the email");
+            throw new Exception("Couldn't find the $field field of the email");
         }
         
         $ret = '';
         
         if ($this->isImapExtensionAvailable) {
-            foreach (imap_mime_header_decode($this->rawFields['subject']) as $h) { // subject can span into several lines
+            foreach (imap_mime_header_decode($this->rawFields[$field]) as $h) { // subject can span into several lines
                 $charset = ($h->charset == 'default') ? 'US-ASCII' : $h->charset;
                 $ret .=  iconv($charset, "UTF-8//TRANSLIT", $h->text);
             }
         } else {
-            $ret = utf8_encode(iconv_mime_decode($this->rawFields['subject']));
+            $ret = utf8_encode(iconv_mime_decode($this->rawFields[$field]));
         }
         
         return $ret;
@@ -195,6 +200,7 @@ class PlancakeEmailParser {
         $detectedContentType = false;
         $contentTransferEncoding = null;
         $charset = 'ASCII';
+        $charset = 'UTF-8'; //osmcz edit
         $waitingForContentStart = true;
 
         if ($returnType == self::HTML)
@@ -261,7 +267,7 @@ class PlancakeEmailParser {
             $body = base64_decode($body);
         else if ($contentTransferEncoding == 'quoted-printable')
             $body = quoted_printable_decode($body);        
-        
+
         if($charset != 'UTF-8') {
             // FORMAT=FLOWED, despite being popular in emails, it is not
             // supported by iconv
