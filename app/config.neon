@@ -7,6 +7,9 @@
 
 
 common:
+    nette:
+        debugger:
+            email: zbytovsky@gmail.com
 
     parameters:
     

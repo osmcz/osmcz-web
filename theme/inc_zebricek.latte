@@ -7,7 +7,7 @@
                         SELECT registred, osm, osmedit
                         FROM users
                         WHERE osmedit>0 AND osm != 'zby-cz' AND osm != 'pschonmann'
-                        ORDER BY ". ($_GET['o']=='e' ? 'registred DESC' : 'osmedit DESC')
+                        ORDER BY ". (isset($_GET['o']) ? 'registred DESC' : 'osmedit DESC')
     );
     $cnt = count($q);
     }
