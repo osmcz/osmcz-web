@@ -105,8 +105,9 @@ class OsmAuthPlugin extends Control
                 }
             }
             if ($row->webpages == 'all') echo '<li>Všechny!</li>';
-            else if ($nic) echo "<li>Žádné ... takže se můžeš leda odhlásit :-)";
+            else if ($nic) echo "<li>Žádné :-)";
             echo "</ul>";
+            echo "<p>Pokud chceš editovat ještě něco, napiš prosím na dev@openstreetmap.cz.";
         } else {
             echo '<p style="font-size:150%;text-align:center;">Jsi přihlášen jako <b><code>SuperAdmin</code></a>.';
 

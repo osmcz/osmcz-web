@@ -20,8 +20,8 @@ RewriteBase /
 ##
 ## Uncomment to prefer www-prefixed domain name
 ##
-#RewriteCond %{HTTP_HOST} ^www.zby.cz$
-#RewriteRule ^.*$ http://zby.cz/$0 [R=301,L]
+RewriteCond %{HTTP_HOST} ^www.openstreetmap.cz$
+RewriteRule ^.*$ http://openstreetmap.cz/$0 [R=301,L]
 
 
 ##
