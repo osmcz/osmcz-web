@@ -2,11 +2,11 @@
 <div class="row komunita">
 {foreach dibi::query("SELECT users.*, count(mailarchive.from) talk_cz_mails
                         FROM users LEFT JOIN mailarchive ON `from` = email
-                        WHERE email != ''
+                        WHERE email != '' AND public = 1
                         GROUP BY email
                         ORDER BY fullname") as $r}
-    <div class="col-sm-6 col-md-4">
-        <div class="thumbnail">
+    <div class="col-sm-6 col-lg-4" style="">
+        <div class="thumbnail" style="height:207px;">
             <img src="{$r->img}" alt="avatar" class="pull-right" width="90">
             <div class="caption">
                 <h3>
@@ -24,44 +24,37 @@
                     {!str_replace('@', '&#064;', htmlspecialchars($r->email))}
                     ({$r->talk_cz_mails} ×)
                 </div>
-                <div n:if="$r->about_me">
-                    {$r->about_me}
-                </div>
+                <div n:if="$r->about_me">{$r->about_me}</div>
+                {foreach explode("\n", $r->tags) as $t}
+                    <span class="label label-info">{$t}</span>
+                {/foreach}
             </div>
 
         </div>
     </div>
-
-    {*
-    <div class="col-md-6">
-        <img src="{$r->img}" width="100" class="pull-left">
-
-        <h3>{$r->fullname}</h3>
-
-        <img src="/theme/img/logo-osm.svg" width="16" alt="">
-        <a href="http://www.openstreetmap.org/user/{$r->username}">{$r->username}</a>
-        ({$r->changesets} editací)
-        <br>
-
-        <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-        {!str_replace('@', '&#064;', htmlspecialchars($r->email))}
-        ({$r->talk_cz_mails} příspěvků)
-        <br>
-
-
-        <a href="https://twitter.com/"><img src="/theme/img/twitter.svg" width="16" alt=""></a>
-        <a href="https://github.com/"><img src="http://github.com/favicon.ico" width="16" alt=""></a>
-
-    </div>
-*}
 {/foreach}
 </div>
 
 
 {if $user->isLoggedIn() AND $user->identity->username}
     <div class="komunita">
-    <h3 id="add-myself">Můj profil na této stránce</h3>
-    {control CommunityFormPlugin}
+        <h3 id="add-myself">Můj profil na této stránce</h3>
+        <p>Profil na této stránce je jakýsi medailonek, který slouží pro přehled v rámci české komunity.
+            Primární uživatelská stránka zůstává na osm.org.</p>
+        <p></p>
+
+        <p>Tento profil dává najevo ochotu ke komunikaci &mdash; proto je povinný email.</p>
+
+        {control CommunityFormPlugin}
+
+        <script>
+            var f = document.getElementById('frmCommunityFormPlugin-about_me');
+            var m = f.getAttribute('maxlength');
+            var d = document.createElement('small');
+            f.parentNode.appendChild(d);
+            f.onkeyup = function(){ d.innerHTML = ' ' + f.value.length + '/' + m; };
+            f.onkeyup();
+        </script>
     </div>
     
 {else}

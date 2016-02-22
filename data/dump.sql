@@ -155,17 +155,19 @@ CREATE TABLE `translations` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 
-
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `webpages` varchar(255) COLLATE utf8_czech_ci NOT NULL COMMENT 'Comma separated page_ids',
   `email` varchar(255) COLLATE utf8_czech_ci NOT NULL,
+  `contact` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `fullname` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `twitter` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `github` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `about_me` varchar(255) COLLATE utf8_czech_ci NOT NULL,
+  `tags` text COLLATE utf8_czech_ci NOT NULL,
+  `public` tinyint(1) NOT NULL,
   `account_created` datetime NOT NULL,
   `img` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `changesets` int(11) NOT NULL,
@@ -176,10 +178,8 @@ CREATE TABLE `users` (
   `talk_cz_mails` int(11) NOT NULL,
   `first_login` datetime NOT NULL,
   `last_login` datetime NOT NULL,
-  `oauth` text COLLATE utf8_czech_ci NOT NULL
+  `oauth` varchar(255) COLLATE utf8_czech_ci NOT NULL COMMENT 'Access token'
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 
-INSERT INTO `users` (`id`, `username`, `webpages`, `email`, `fullname`, `twitter`, `github`, `about_me`, `account_created`, `img`, `changesets`, `traces`, `description`, `home_lat`, `home_lon`, `talk_cz_mails`, `first_login`, `last_login`, `oauth`) VALUES
-(162287,	'zby-cz',	'admin',	'zbytovsky@gmail.com',	'Pavel Zbytovský',	'zbycz',	'zbycz',	'Nadšenec webových map, dělník tohoto webu. Freelance developer a skautský vedoucí.',	'2009-08-24 13:40:24',	'http://api.openstreetmap.org/attachments/users/images/000/162/287/original/ff90b90420b4795f053c2e33d49688a1.jpg',	313,	28,	'[**Pavel Zbytovský** - my personal homepage http://zby.cz/](http://zby.cz) \n\npavel@zby.cz ~ [wiki](http://wiki.openstreetmap.org/wiki/User:Zby-cz) ~ Prague, Czech Rep.\n\nwww.openstreetmap.cz ~ http://github.com/osmcz\n\nI prefer mail communication to message system.<br>Preferuji tykání a mailem - ne přes vnitřní zprávy.',	50.092247972069,	14.321143531209,	0,	'2016-01-20 01:09:20',	'2016-01-20 14:58:52',	'');
 
--- 2016-02-05 10:24:50
+-- 2016-02-22 23:19:01
