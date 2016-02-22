@@ -168,6 +168,8 @@ class Admin_PagesPresenter extends Admin_BasePresenter
 
 	//delete & undelete
 	public function handleDeletePage($undo = false){
+        if(!$this->editAllowed()) return;
+
 		if($undo)
 			$this->page->undelete();
 		else

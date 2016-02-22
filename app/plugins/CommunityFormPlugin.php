@@ -11,7 +11,7 @@ class CommunityFormPlugin extends AppForm
 {
     static $events = array();
 
-    public $tags;
+    public $tags, $projects;
 
     public function __construct()
     {
@@ -24,22 +24,23 @@ class CommunityFormPlugin extends AppForm
             $this->tags[$t] = $t;
         }
 
-        $this->addText('username', 'OSM.org username')
-            ->setOption('description', 'Obrázek je třeba změnit na osm.org nebo gravatar.com.')
-            ->setDisabled();
+        $this->projects = PagesModel::getPagesByMeta("project_tag")->getPairs('');
 
-        $this->addText('email', 'E-mail')
-            ->setOption('description', 'Email použivaný pro talk-cz.')
-            ->addRule(Form::FILLED, '%label není vyplněn.')
-            ->addRule(Form::EMAIL, '%label není validní.');
+        $this->addText('username', 'OSM.org username')
+            ->setDisabled();
 
         $this->addText('fullname', 'Celé jméno')
             ->setOption('description', 'Ať se poznáme!')
             ->addRule(Form::FILLED, '%label není vyplněn.')
             ->addRule(Form::MIN_LENGTH, '%label musí mít alespoň 5 znaků.', 5);
 
-        $this->addText('contact', 'E-mail kontaktní')
-            ->setOption('description', '(nepovinné) Pokud se liší.')
+        $this->addText('email', 'Talk-cz')
+            ->setOption('description', 'Email použivaný pro spočítání příspěvků v talk-cz (neveřejný)')
+            ->addRule(Form::FILLED, '%label není vyplněn.')
+            ->addRule(Form::EMAIL, '%label není validní.');
+
+        $this->addText('contact', 'Veřejný e-mail')
+            ->setOption('description', '(nepovinné)')
             ->addCondition(Form::FILLED)
             ->addRule(Form::EMAIL, '%label není validní.');
 
@@ -48,18 +49,22 @@ class CommunityFormPlugin extends AppForm
         $this->addText('github', 'Github')
             ->setOption('description', '(nepovinné) Uživatelské jméno');
 
+        $this->addText('places', 'Výskyt')
+            ->setOption('description', '(nepovinné) Kde se vyskystuju - typicky jaká města.');
+        $this['places']->getControlPrototype()->placeholder = 'oddělené čárkou';
+        $this['places']->getControlPrototype()->style = 'width: 40%';
 
-        $this->addText('about_me', 'O mně')
-            ->addRule(Form::MAX_LENGTH, '%label nesmí mít více než %d znaků.', 120)
-            ->setOption('description', '(nepovinné) O mně ve 120 znacích.')
-            ->getControlPrototype()->maxlength(120);
+        $this->addText('tags', 'Oblasti zájmu')
+            ->setOption('description', '(nepovinné)');
+        $this['tags']->getControlPrototype()->placeholder = 'oddělené čárkou';
+        $this['tags']->getControlPrototype()->style = 'width: 60%';
+        $this['tags']->getControlPrototype()->{'data-options'} = Json::encode(array_values($this->tags));
 
-        $this->addMultiSelect('tags', 'Oblasti zájmu', $this->tags)
-            ->setOption('description', '(nepovinné)')
-            ->getControlPrototype()->style = 'height:150px;width:200px';
+        $this->addMultiSelect('projects', 'Projekty', $this->projects)
+            ->setOption('description', '(nepovinné) Projektovou stránku možno přidat v administraci. Případně napiš na dev@openstreetmap.cz')
+            ->getControlPrototype()->style = 'height:150px;width:40%';
 
-
-        $this->addCheckbox('public', 'Zveřejnit profil na openstreetmap.cz/komunita');
+        $this->addCheckbox('public', 'Zveřejnit údaje na openstreetmap.cz');
 
         $this->addSubmit('submit', 'Uložit údaje');
         $this->onSuccess[] = callback($this, 'submitted');
@@ -78,7 +83,8 @@ class CommunityFormPlugin extends AppForm
 
         if (!$this->isSubmitted()) {
             $row = dibi::fetch("SELECT * FROM users WHERE username = %s", $presenter->user->id);
-            $row['tags'] = explode("\n", $row['tags']);
+            $row['tags'] = $row['tags'];
+            $row['projects'] = array_map(function($a){return trim($a,'()');}, explode(",", $row['projects']));
             if ($row) $this->setValues($row);
         }
     }
@@ -87,7 +93,7 @@ class CommunityFormPlugin extends AppForm
     {
         if ($this->presenter->user->id) {
             $values = $this->values;
-            $values['tags'] = join("\n", $values['tags']);
+            $values['projects'] = join(",", array_map(function($a){return "($a)";}, $values['projects']));
             dibi::query("UPDATE users SET", $values, "WHERE username = %s", $this->presenter->user->id); //our id is username
             $this->presenter->flashMessage('Profil upraven pro ' . $this->presenter->user->id);
         }

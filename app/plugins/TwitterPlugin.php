@@ -28,12 +28,13 @@ class TwitterPlugin extends Control
                 'ignore_retweets' => false,
                 'date_lang' => 'cs_CZ',
                 'cachetime' => 120,
+                'cache_dir' => $this->parent->context->params['tempDir'] . '/'
             ));
 
         $tweet_array = $TweetPHP->get_tweet_array();
-        if(count($tweet_array) === 1){
+        if(count($tweet_array) === 1){ //error message
 	        print_r($tweet_array);
-        	return; 
+        	return;
         }
 
         $weeklys = array();

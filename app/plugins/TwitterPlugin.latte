@@ -19,7 +19,7 @@
                 {!$t[text]}
                 <div class="retweet" n:if="$t[retweet]"><span class="glyphicon glyphicon-retweet"></span>
                     Retweetnuto od {$t[orig][user][name]}</div>
-                <img src="{$t[entities][media][0][media_url]}" alt="300x200" class="img-responsive"
+                <img src="{$t[entities][media][0][media_url]}" alt="300x200" class="img-responsive" style="max-height:250px"
                      n:if="@$t[entities][media][0][media_url]">
             </div>
 

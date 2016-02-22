@@ -1,6 +1,10 @@
+git add .
+
+git commit --amend --no-edit
+
 git push --force-with-lease "server" master:master
 
-pause
+rem pause
 exit /B
 
 ----------------------

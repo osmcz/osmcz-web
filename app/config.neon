@@ -29,6 +29,9 @@ common:
             - TwitterPlugin
             - CommunityFormPlugin
 
+        macros:
+            gallery: 			%appDir%/macros/gallery.latte
+
 
 production < common:
 development < common:

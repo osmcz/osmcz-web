@@ -39,13 +39,13 @@ class Front_OauthPresenter extends Front_BasePresenter
     // OAuth 1.0
     public function actionLogin($backUrl = '/komunita')
     {
-        $this->getSession('oauth')->back_url = $backUrl;
-
         try {
+            $this->getSession('oauth')->back_url = $backUrl;
             $this->getUserDetailsAndLoginUser();
             return;
+
         } catch (OAuthException $E) {
-            // OK - not authentized -> use
+            // not authentized -> continue below in asking for new token
         }
 
         // request token
@@ -80,15 +80,16 @@ class Front_OauthPresenter extends Front_BasePresenter
 
             $access_token_info = $this->oauth->getAccessToken(self::ACCESS_TOKEN_URL);
 
+            $this->getSession('oauth')->login_secret = false;
             $this->getSession('oauth')->token = $access_token_info['oauth_token'];
             $this->getSession('oauth')->secret = $access_token_info['oauth_token_secret'];
 
             $this->getUserDetailsAndLoginUser();
 
         } catch (OAuthException $E) {
-            echo("Exception:\n");
-            print_r($E);
-            exit;
+            Debugger::log($E); //zalogujeme for sichr
+            echo "OAuth login failed. Please, contact administrator.";
+            $this->terminate();
         }
 
     }
@@ -97,6 +98,7 @@ class Front_OauthPresenter extends Front_BasePresenter
     {
         $this->oauth->setToken($this->getSession('oauth')->token, $this->getSession('oauth')->secret);
 
+        //fetch user datail XML
         $this->oauth->fetch(self::API_URL . "user/details");
         $user_details = $this->oauth->getLastResponse();
 
@@ -121,22 +123,26 @@ class Front_OauthPresenter extends Front_BasePresenter
         // update db
         $row = dibi::fetch('SELECT * FROM users WHERE id = %i', $user['id']);
         if ($row) {
-            unset($user['username']); //better dont change usernames, we use it as primary key
-
+            //better dont change usernames, we use it as primary key
+            unset($user['username']);
             dibi::query('UPDATE users SET ', $user, ' WHERE id = %i', $user['id']);
+
         } else {
             $user['first_login'] = new DateTime();
             dibi::query('INSERT INTO users ', $user);
         }
 
-        // load row from db
-        $user = dibi::fetch('SELECT * FROM users WHERE id = %i', $user['id']);
-        $this->user->login(new Identity($user['username'], array($user['webpages'] == 'admin' ? 'admin' : 'user'), $user));
+        // load complete row from db
+        $dbuser = dibi::fetch('SELECT * FROM users WHERE id = %i', $user['id']);
+
+        if ($dbuser['webpages'] != 'admin' AND $dbuser['webpages'] != 'all')
+            $dbuser['webpages'] = '14' . ($dbuser['webpages'] ? ',' : '') . $dbuser['webpages'];
+
+        $this->user->login(new Identity($dbuser['username'], array($dbuser['webpages'] == 'admin' ? 'admin' : 'user'), $dbuser));
 
         // remove all tokens - TODO if tokens to be used, save them in DB
 
         $this->redirectUrl('//' . $_SERVER['HTTP_HOST'] . $this->getSession('oauth')->back_url);
-        //$this->redirect(':Admin:Admin:');
     }
 }
 

@@ -126,20 +126,18 @@
             xxx left<br>
         </div>
     </div>
+  -->
+
     <div id="map-layers">
         <div class="sidebar-inner">
-            <button type="button" class="close" onclick="$(this).parent().parent().hide();"><span
+            <button type="button" class="close"><span
                     aria-hidden="true">&times;</span></button>
             <h2>Vrstvy</h2>
-            right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br>
-            right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br>
-            right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br>
-            right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br>
-            right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br> right<br>
-            right<br> right<br> right<br> right<br> right<br> xxxx right<br>
+            <p>V mapových vrstvách poznáte pravou sílu OpenStreetMap. Jednu mapovou databázi vykreslují různí dobrovolníci pro mnoho různých využití - od turistiky po lyžování.
+            <div id="map-layers-content">
+            </div>
         </div>
     </div>
-    -->
     <div id="map-searchbar">
     </div>
     <div id="map"></div>
@@ -340,6 +338,9 @@
 <!-- js-cookie -->
 <script src='http://cdn.rawgit.com/js-cookie/js-cookie/v2.1.0/src/js.cookie.js'></script>
 
+<!-- opening_hours from http://openingh.openstreetmap.de/opening_hours.js/opening_hours+deps.min.js at 6 Apr 2016 -->
+<script src='lib/opening_hours+deps.min.js'></script>
+
 
 <script src="js/lib-component-querystring.js"></script>
 <script src="js/lib-osm.js"></script>
@@ -351,6 +352,7 @@
 <link href="css/map-style.css" rel="stylesheet">
 
 <script src="js/layers.js"></script>
+<script src="js/layer-switcher.js"></script>
 <script src="js/controls.js"></script>
 <script src="js/guideposts.js"></script>
 <script src="js/active-layer.js"></script>

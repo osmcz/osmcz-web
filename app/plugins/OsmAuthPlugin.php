@@ -24,7 +24,7 @@ class OsmAuthPlugin extends Control
         //allowed presenter views
         $presenters = array(
             'Admin:Admin' => 'default,logout',
-            'Admin:Pages' => 'edit,error,add',
+            'Admin:Pages' => 'edit,error,add,trash',
             'Admin:Redirect' => 'default',
         );
         if (!isset($presenters[$presenter->name])) //not allowed presenter
@@ -39,7 +39,8 @@ class OsmAuthPlugin extends Control
             'Admin:Pages' => array( //checked by allow_page_edit($id)
                 'pageEditForm-submit',
                 'npFilesControl-.*',
-                '-subpagessort'
+                '-subpagessort',
+                '-deletePage',
             ),
         );
 
@@ -108,6 +109,7 @@ class OsmAuthPlugin extends Control
             else if ($nic) echo "<li>Žádné :-)";
             echo "</ul>";
             echo "<p>Pokud chceš editovat ještě něco, napiš prosím na dev@openstreetmap.cz.";
+            echo "<p>Pro znovunačtení práv, prosím, klikni sem: <a href='/oauth/login?backUrl=/admin' class='btn btn-default btn-xs'>Znovu načíst</a>.";
         } else {
             echo '<p style="font-size:150%;text-align:center;">Jsi přihlášen jako <b><code>SuperAdmin</code></a>.';
 

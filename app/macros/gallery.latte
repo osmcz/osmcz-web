@@ -1,0 +1,31 @@
+
+{default $files = FilesModel::getByPageDotGallery($opts[0])}
+{var $s = isset($opts['size']) ? $opts['size'] : 200}
+
+<div class="row gallery">
+{foreach $files as $f}
+	{* --- 800x600 is parsed by Lightbox - dont change --- *}
+	{var $href = $f->previewLink('800x600')}
+
+    <div n:class="$s>200 ? 'col-md-6' : 'col-xs-6 col-md-4'">
+        <a href='{$href}' class='lightbox thumbnail'{if trim($f->description)} title='{$f->description|trim}'{/if}
+                style="height: {$s+50}px;">
+		  <img src='{$f->previewLink($s . (isset($opts['crop'])?'_crop':'') . (isset($opts['crop2'])?'_crop2':'') )}'>
+            {ifset $opts['filenames']}
+                <span class="caption">{$f->filename}</span>
+            {/ifset}
+        </a>
+    </div>
+{/foreach}
+</div>
+
+<style>
+    .gallery .thumbnail {
+        display: flex; justify-content: center; flex-direction: column;
+        text-align:center;
+    }
+    .gallery a:hover {
+        text-decoration: none;
+    }
+
+</style>

@@ -1,13 +1,7 @@
 {block title}OpenStreetMap.cz{/block}
 {block layout_aftertitle}{/block}
 
-{block map}
-<div id="map-container">
-    <div id="map-searchbar">
-    </div>
-    <div id="map"></div>
-</div>
-{/block}
+{block map}{include #osmczmap}{/block}
 
 {block content}
 <div class="container splash">

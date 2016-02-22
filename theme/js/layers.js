@@ -14,7 +14,7 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
     });
 
     var turisticka = L.tileLayer("http://tile.poloha.net/{z}/{x}/{y}.png", {
-        maxZoom: 18,
+        maxZoom: 20,
         attribution: osmAttr + ', <a href="http://www.poloha.net">poloha.net</a>',
         code: 'k'
     });
@@ -59,6 +59,12 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
         maxZoom: 18,
         attribution: osmAttr + ', <a href="http://www.thunderforest.com/maps/transport/">Thunderforest</a>',
         code: 't'
+    });
+    
+    var opnv = L.tileLayer("http://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: osmAttr + ', <a href="http://www.öpnvkarte.de/">öpnvkarte</a>',
+        code: 'ö'
     });
 
     var bezpopisku = L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}" + retinaSuffix + ".png", {
@@ -108,7 +114,7 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
 
 
     var turistikaOverlay = L.tileLayer("http://tile.poloha.net/kct/{z}/{x}/{y}.png", {
-        maxZoom: 18,
+        maxZoom: 20,
         attribution: osmAttr + ', <a href="http://www.poloha.net">poloha.net</a>',
         opacity: 0.6,
         code: 'K'
@@ -124,7 +130,7 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
     var vrstevniceOverlayUrl = "http://tile.poloha.net/contours/{z}/{x}/{y}.png";
     var vrstevniceOverlayOrtoUrl = "http://tile.poloha.net/contours_ortofoto/{z}/{x}/{y}.png";
     var vrstevniceOverlay = L.tileLayer(vrstevniceOverlayUrl, {
-        maxZoom: 18,
+        maxZoom: 20,
         attribution: osmAttr + ', <a href="http://www.poloha.net">poloha.net</a>',
         opacity: 0.6,
         code: 'V'
@@ -160,6 +166,7 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
     baseLayers["Hikebikemap.org"] = hikebike;
     baseLayers["Vodovky"] = vodovky;
     baseLayers["Dopravní"] = dopravni;
+    baseLayers["Dopravní öpnv"] = opnv;
     baseLayers["Bez popisků"] = bezpopisku;
     baseLayers["Ortofoto ČÚZK"] = ortofoto;
 

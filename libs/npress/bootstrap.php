@@ -67,13 +67,14 @@ $adminRouter[] = new Route('admin/<presenter>/<action>[/<id_page>]', 'Admin:defa
 
 $container->router[] = $frontRouter = new RouteList('Front');
 $frontRouter[] = new Route('data/thumbs/<id>[.<opts>].png', 'Files:preview');
+$frontRouter[] = new Route('files[/<action>][/<id>]', 'Files:default');
 $frontRouter[] = new Route('index.php', 'Pages:default', Route::ONE_WAY);
 $frontRouter[] = new PagesRouter;
 $frontRouter[] = new RedirectRouter;
 $frontRouter[] = new Route('<presenter>[/<action>]/<id_page>', array( //default route
         'presenter' => 'Pages',
         'action' => 'default',
-        'id_page' => 1, //TODO default page from config
+        'id_page' => 1, //TODO default page from config (but matched only when '/' page missing)
     ));
 
 
