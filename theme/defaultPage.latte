@@ -39,7 +39,7 @@
                     {include inc_zebricek.latte}
                 {/if}
 
-                {if $page->getMeta('komunita') && $page->getMeta('project_tag')}
+                {if $page->getMeta('komunita') && $page->getMeta('project_tag') && !$page->getMeta('komunitawide')}
                     <h3>Zainteresovaní lidé z komunity</h3>
                     {include inc_komunita.latte, is_project_page => true, is_wide => $page->getMeta(hidetwitter)}
                 {/if}
@@ -49,6 +49,12 @@
                 {include inc_twitter.latte}
             </div>
         </div>
+
+
+        {if $page->getMeta('komunita') && $page->getMeta('project_tag') && $page->getMeta('komunitawide')}
+            <h3>Zainteresovaní lidé z komunity</h3>
+            {include inc_komunita.latte, is_project_page => true, is_wide => true}
+        {/if}
 
         {* hlavní komunitní stránka -- pod twitterem *}
         {if $page->getMeta('komunita') && !$page->getMeta('project_tag')}
