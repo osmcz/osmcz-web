@@ -11,7 +11,7 @@ initmap();
 
 function initmap() {
     map = new L.Map('map', {zoomControl: false});
-    map.attributionControl.setPrefix("<a href='https://github.com/osmcz/osmcz' title='Projekt na Githubu'><img src='http://github.com/favicon.ico' width='10' style='margin-right:1ex'>osmcz-app</a> " + OSMCZ_APP_VERSION);
+    map.attributionControl.setPrefix("<a href='https://github.com/osmcz/osmcz' title='Projekt na Githubu'><img src='https://github.com/favicon.ico' width='10' style='margin-right:1ex'>osmcz-app</a> " + OSMCZ_APP_VERSION);
 
     // -------------------- map layers --------------------
     new osmcz.layers(map, baseLayers, overlays);
@@ -22,6 +22,7 @@ function initmap() {
 
     // -------------------- modules --------------------
     guideposts = new osmcz.guideposts(map, baseLayers, overlays, controls);
+    gpcheck = new osmcz.gpcheck(map, baseLayers, overlays, controls);
     new osmcz.poiPopup(map);
 
 
@@ -40,12 +41,12 @@ function initmap() {
         marker.setLatLng([params.mlat, params.mlon]).addTo(map);
     }
     if (params.object)
-        osmcz.poiPopup.open(params.object);
+        osmcz.poiPopup.load(params.object);
 
     // load osm object by URL osmap.cz/node/123
     var loadObject = /^\/(node|way|relation)\/(\d+)$/.exec(location.pathname);
     if (loadObject)
-        osmcz.poiPopup.open({type: loadObject[1], id: loadObject[2]});
+        osmcz.poiPopup.load({type: loadObject[1], id: loadObject[2]});
 
     // update on hash change
     var lastHash;

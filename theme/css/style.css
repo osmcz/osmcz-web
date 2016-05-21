@@ -107,6 +107,11 @@ a:hover.as-text {
     height: 100%;
     overflow-y: scroll;
 }
+
+#map-sidebar {
+    display: none;
+}
+
 #map-layers {
     right:0;
     width: 250px;
@@ -181,6 +186,7 @@ a:hover.as-text {
 #map-searchbar .osmid {
     padding-top: 1em;
     font-size: 90%;
+    white-space: nowrap;
 }
 
 /* Opening hours */
@@ -325,9 +331,150 @@ a:hover.as-text {
   padding-left: 5px;
 }
 
-.leaflet-control-coordinates-gps{
+.leaflet-control-coordinates-gps {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.65);
 }
+
+/* gp-check */
+.gp-check-popup {
+    min-width: 250px;
+    max-width: 350px;
+}
+
+.gp-check-popup h6 {
+  font-size: 1.2em;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.no-foto {
+  text-align: center;
+  font-size: 2em;
+}
+
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+.flex-v-center {
+    display: flex;
+    align-items: center;
+}
+
+/* gc-check - image upload form */
+#gpc-img-upload-form {
+    width:350px;
+}
+
+input[type=file], input[type=text] {
+    background:#eee;
+    color:#000;
+    padding:5px;
+    border:2px solid #eee;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    margin: 2px;
+}
+
+input[type=text]:focus {
+    border:2px solid #337ab7;
+}
+
+input[type=text].inputError {
+    border:2px solid #d9534f;
+}
+
+#gpc-img-upload-form .legend {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#gpc-img-upload-form .gpc-upl-result {
+  padding-top: 5px;
+  margin-top: 5px;
+  text-align: center;
+}
+
+.coors-block {
+    background: #DDD;
+    padding: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+/* Spin icon
+ * From: http://bootsnipp.com/snippets/featured/glyphicon-animate-rotation-and-flip
+ *
+ * So much code just to make icon spin...
+ */
+.gly-spin {
+  -webkit-animation: spin 2s infinite linear;
+  -moz-animation: spin 2s infinite linear;
+  -o-animation: spin 2s infinite linear;
+  animation: spin 2s infinite linear;
+}
+
+@-moz-keyframes spin {
+  0% {
+    -moz-transform: rotate(0deg);
+  }
+  100% {
+    -moz-transform: rotate(359deg);
+  }
+}
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+  }
+}
+@-o-keyframes spin {
+  0% {
+    -o-transform: rotate(0deg);
+  }
+  100% {
+    -o-transform: rotate(359deg);
+  }
+}
+@keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+/* Spin icon END */
+
+/* margins on top */
+.margin-top-05 { margin-top: 0.5em; }
+.margin-top-10 { margin-top: 1.0em; }
+.margin-top-15 { margin-top: 1.5em; }
+.margin-top-20 { margin-top: 2.0em; }
+.margin-top-25 { margin-top: 2.5em; }
+.margin-top-30 { margin-top: 3.0em; }
+
+/* guidepost.js */
+#hashtags {
+  padding: 1em 0 1em 0;
+  line-height: 2;
+  text-align: center;
+}
+
+.buttons-bar {
+  text-align: center;
+}
+
+.space-2em {
+  margin-left: 2em;
+}
+
 
 /* Primárně pro účely splashe */
 #main .jumbotron {

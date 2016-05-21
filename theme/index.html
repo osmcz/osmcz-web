@@ -112,21 +112,19 @@
     <!-- /.container-fluid -->
 </nav>
 
+
 <div id="map-container">
-    <!--
+
     <div id="map-sidebar">
         <div class="sidebar-inner">
-            <button type="button" class="close" onclick="$(this).parent().parent().hide();"><span
-                    aria-hidden="true">&times;</span></button>
-            <h2>Editace rozcestníku</h2>
-            left<br>left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br>
-            left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br>
-            left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br> left<br>
-            left<br>
-            xxx left<br>
+            <button type="button" id="sidebar-close-button" class="close" onclick="$(this).parent().parent().hide()"><span aria-hidden="true">&times;</span></button>
+            <div id="sidebar-content">
+              <h2>Ahoj</h2>
+              <p>Zde se normalne nachazi uzitecne informace</p>
+            </div>
         </div>
     </div>
-  -->
+
 
     <div id="map-layers">
         <div class="sidebar-inner">
@@ -351,6 +349,10 @@
 <script src="js/lib-osm.js"></script>
 <script src="js/TileLayer.GeoJSON.js"></script>
 
+<!-- https://github.com/exif-js/exif-js -->
+<script type="text/javascript" src="lib/exif.js"></script>
+
+
 <!-- ------------ /vendor ------------ -->
 
 <!-- ------------ app ------------ -->
@@ -361,6 +363,7 @@
 <script src="js/layer-switcher.js"></script>
 <script src="js/controls.js"></script>
 <script src="js/guideposts.js"></script>
+<script src="js/gp-check.js"></script>
 <script src="js/icons-service.js"></script>
 <script src="js/opening-hours-service.js"></script>
 <script src="js/poi-popup.js"></script>

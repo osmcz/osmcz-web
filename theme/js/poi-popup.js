@@ -15,10 +15,15 @@ osmcz._map = false;
 
 
 // static methods
-osmcz.poiPopup.open = function (object) {
+osmcz.poiPopup.load = function (object) {
+
+    // exit when osm object does not exists or osmid is null
+    if ((! object) || (! "id" in object) ) {
+      return;
+    }
 
     $.ajax({
-        url: 'http://www.openstreetmap.org' + OSM.apiUrl({type: object.type, id: object.id}),
+        url: 'https://www.openstreetmap.org' + OSM.apiUrl({type: object.type, id: object.id}),
         dataType: 'xml',
         jsonp: false,
         global: false,
@@ -44,6 +49,10 @@ osmcz.poiPopup.open = function (object) {
                 };
             }
 
+            if (feature.properties.tags.name) {
+                document.title = feature.properties.tags.name + ' ~ OpenStreetMap.cz';
+            }
+
             console.log("geojson feature:", feature);
 
             // zoom to feature
@@ -60,6 +69,15 @@ osmcz.poiPopup.open = function (object) {
 
 };
 
+osmcz.poiPopup.open = function (feature, icon) {  //currently from active-layer
+  $('#map-container').addClass('searchbar-on');
+  $('#map-searchbar').html(osmcz.poiPopup.getHtml(feature, icon));
+  document.title = 'OpenStreetMap.cz';
+  if (feature.properties.tags.name) {
+    document.title = feature.properties.tags.name + ' ~ OpenStreetMap.cz';
+  }
+};
+
 
 osmcz.poiPopup.close = function () {
     console.log('poi-popup: close');
@@ -69,6 +87,8 @@ osmcz.poiPopup.close = function () {
 
     //if (!$('#map-container').hasClass('js_active-layer-on'))
     $('#map-container').removeClass('searchbar-on');
+
+    document.title = 'OpenStreetMap.cz';
 
     var path = (location.host === 'openstreetmap.cz' || location.host === 'osm.localhost')
         ? '/'
@@ -87,7 +107,7 @@ osmcz.poiPopup.setUrl = function (p) {
 
 
 // ------- POI panel template  -------
-osmcz.poiPopup.getHtml = function (feature, icon) {
+osmcz.poiPopup.getHtml = function (feature, icon, embedded = false) {
 
     //TODO refactor
 
@@ -106,17 +126,25 @@ osmcz.poiPopup.getHtml = function (feature, icon) {
     var lon = feature.geometry.coordinates[0];
     var lat = feature.geometry.coordinates[1];
 
+    // Get preferred user language and use it on wikipedia
+    var userLang = (window.navigator.userLanguage || window.navigator.language).split("-")[0];
+    var wikiLang = (userLang ? "?uselang=" + userLang : "" );
+
     // show circle marker
     if (osmcz.permanentlyDisplayed) {
         osmcz._marker.setLatLng([lat, lon]).addTo(osmcz._map);
     }
 
     var tpl = [];
-    tpl.push(osmcz.permanentlyDisplayed ? '<a class="close">&times;</a>' : '');
-    tpl.push('<h4>');
-    tpl.push('<img src="' + icon + '">&nbsp;');
-    tpl.push(feature.properties.tags.name || 'Bod zájmu');
-    tpl.push('</h4>');
+
+    // Not needed when we are inside popup
+    if (!embedded) {
+      tpl.push(osmcz.permanentlyDisplayed ? '<a class="close">&times;</a>' : '');
+      tpl.push('<h4>');
+      tpl.push('<img src="' + icon + '">&nbsp;');
+      tpl.push(feature.properties.tags.name || 'Bod zájmu');
+      tpl.push('</h4>');
+    }
 
     $.each(feature.properties.tags, function (k, v) {
         k = k + "";
@@ -167,11 +195,16 @@ osmcz.poiPopup.getHtml = function (feature, icon) {
             var v = general[i].v;
             tpl.push('<b>' + k + '</b> = ');
             // wikipedia=* or xxx:wikipedia=*
-            if (k.match(/^wikipedia$/) || k.match(/:wikipedia$/))
-                tpl.push('<a href="https://www.wikipedia.org/wiki/' + v + wikiLang + '">' + v + '</a>');
+            if (k.match(/^wikipedia$/) || k.match(/:wikipedia$/)) {
+                if (v.match(/:/)) {
+                  tpl.push('<a href="https://' + v.split(":")[0] + '.wikipedia.org/wiki/' + v.split(":")[1] + wikiLang + '">' + v + '</a>');
+                } else {
+                  tpl.push('<a href="https://wikipedia.org/wiki/' + v + wikiLang + '">' + v + '</a>');
+                }
+            }
             // wikipedia:<country>=* or xxx:wikipedia:<country>=*
             else if (k.match(/^wikipedia:/) || k.match(/:wikipedia:/))
-                tpl.push('<a href="https://www.wikipedia.org/wiki/' + k.split(":").pop() + ':' + v + wikiLang + '">' + v + '</a>');
+                tpl.push('<a href="https://' + k.split(":").pop() + '.wikipedia.org/wiki/' + v + wikiLang + '">' + v + '</a>');
             // wikidata=*
             else if (k.match(/^wikidata$/))
                 tpl.push('<a href="https://www.wikidata.org/wiki/' + v + wikiLang + '">' + v + '</a>');
@@ -183,7 +216,7 @@ osmcz.poiPopup.getHtml = function (feature, icon) {
                 tpl.push('<a href="https://commons.wikimedia.org/wiki/' + v + wikiLang + '">' + v + '</a>');
             // Katalog národního památkového ústavu
             else if (k.match(/^ref:npu$/))
-                tpl.push('<a href="http://pamatkovykatalog.cz/?mode=parametric&isProtected=1&presenter=ElementsResults&indexId=' + encodeURIComponent(v) + '">' + v + '</a>');
+                tpl.push('<a href="http://pamatkovykatalog.cz/?mode=parametric&isProtected=1&presenter=ElementsResults&indexId=' + encodeURIComponent(v) + '">' + v + '</a>'); // @TODO: upravit, až bude HTTPS verze
             else
             // Just standard url
                 tpl.push(v.match(/^https?:\/\/.+/) ? ('<a href="' + v + '">' + v + '</a>') : v);
@@ -211,13 +244,22 @@ osmcz.poiPopup.getHtml = function (feature, icon) {
     };
 
     section(name, 'Další jména:', true);
-    tpl = tpl.concat(osmcz.openingHoursService.getHtml(openingHours));
+    try {
+        tpl = tpl.concat(osmcz.openingHoursService.getHtml(openingHours));
+    } catch (err) {
+        tpl.push("<b>opening_hours</b> = " + openingHours + "<br> <em>(Nepodařilo se naparsovat: "+err+")</em>");
+    }
     section(payment, 'Možnosti platby:');
     section(contact, 'Kontakty:');
     section(building, 'Budova:');
 
+    // Finish there when we are inside popup
+    if (embedded) {
+        return tpl.join('');
+    }
+
     //tpl.push('<div class="osmid"><a href="http://osm.org/' + osm_type + '/' + id + '">osm ID: ' + osm_type + '/' + id + '</a></div>');
-    tpl.push('<div class="osmid"><a href="http://osmap.cz/' + osm_type + '/' + id + '">osmap.cz/' + osm_type + '/' + id + '</a></div>');
+    tpl.push('<div class="osmid"><a href="http://osmap.cz/' + osm_type + '/' + id + '">osmap.cz/' + osm_type + '/' + id + '</a></div>'); // @FIXME: asi by mělo být taky HTTPS?
     tpl.push('<div id="wikimedia-commons" data-osm-id="' + id + '"></div>');
     tpl.push('<div id="guidepost" data-osm-id="' + id + '"></div>');
     tpl.push('<div id="mapillary-photo" data-osm-id="' + id + '"></div>');
@@ -235,12 +277,7 @@ osmcz.poiPopup.getHtml = function (feature, icon) {
     }
 
     // url of ajax proxy server for wikipedia and wikimedia
-    var xhd_proxy_url = 'http://openstreetmap.cz/xhr_proxy.php';
-
-    // Get preferred user language and use it on wikipedia
-    var userLang = (window.navigator.userLanguage || window.navigator.language).split("-")[0];
-    var wikiLang = (userLang ? "?uselang=" + userLang : "" );
-
+    var xhd_proxy_url = 'https://openstreetmap.cz/xhr_proxy.php';
 
     // Show picture from wikimedia commons if there is `wikidata` or `wikimedia_commons` or `wikipedia` tag
     // Priorities:
@@ -355,7 +392,7 @@ osmcz.poiPopup.getHtml = function (feature, icon) {
         else {
             var ref = feature.properties.tags.ref;
             $.ajax({
-                url: 'http://api.openstreetmap.cz/table/close?lat=' + lat + '&lon=' + lon + '&distance=50&limit=1',
+                url: 'http://api.openstreetmap.cz/table/close?lat=' + lat + '&lon=' + lon + '&distance=50&limit=1', // @TODO: upravit, až bude HTTPS verze
                 //url: 'http://api.openstreetmap.cz/table/ref/' + ref,
                 data: {
                     outputFormat: 'application/json',
@@ -372,10 +409,13 @@ osmcz.poiPopup.getHtml = function (feature, icon) {
 
     var gpTpl = '<h5>Foto rozcestníku</h5>'
         + '<a href="_imgUrl">'
-        + '<img src="_imgUrl" width="250">'
-        + '</a><br>'
-        + '<b>Fotografii poskytl:</b> _autor'
-        + "<a href='http://api.openstreetmap.cz/table/id/_id' target='_blank'><span class='glyphicon glyphicon-pencil' title='upravit'></span></a>";
+        + '  <img src="_imgUrl" width="250">'
+        + '</a>'
+        + '<div class="margin-top-05"><b>Fotografii poskytl: </b> _autor'
+        + '<span style="margin: 0.5em"/>'
+        + ' <a href="http://api.openstreetmap.cz/table/id/_id" target="_blank" class="btn btn-default btn-xs">' // @TODO: upravit, až bude HTTPS verze
+        + '   <span class="glyphicon glyphicon-pencil" title="upravit"></span> upravit</a>'
+        + '</div>'
 
     function showGuidepost() {
         var gp = $('#guidepost');
@@ -384,7 +424,7 @@ osmcz.poiPopup.getHtml = function (feature, icon) {
             if (!feature.guidepost.features.length)
                 return;
             var autor = feature.guidepost.features[0].properties.attribution;
-            var imgUrl = 'http://api.openstreetmap.cz/' + feature.guidepost.features[0].properties.url;
+            var imgUrl = 'http://api.openstreetmap.cz/' + feature.guidepost.features[0].properties.url; // @TODO: upravit, až bude HTTPS verze
             var gpostId = feature.guidepost.features[0].properties.id;
             gp.html(gpTpl.replace(/_autor/g, autor).replace(/_imgUrl/g, imgUrl).replace(/_id/g, gpostId));
         }
@@ -405,7 +445,7 @@ osmcz.poiPopup.getHtml = function (feature, icon) {
             else {
                 //TODO - limit=10 & choose the best oriented photo
                 $.ajax({
-                    url: 'http://api.mapillary.com/v1/im/close?lat=' + lat + '&lon=' + lon + '&distance=30&limit=1',
+                    url: 'https://api.mapillary.com/v1/im/close?lat=' + lat + '&lon=' + lon + '&distance=30&limit=1',
                     dataType: 'json',
                     jsonp: false,
                     global: false,
@@ -418,9 +458,10 @@ osmcz.poiPopup.getHtml = function (feature, icon) {
         }
     }
 
+    // "_key" se nahrazuje OSM IDčkem
     var mpTpl = '<h5>Nejbližší foto</h5>'
-        + '<a href="http://www.mapillary.com/map/im/_key/photo">'
-        + '<img src="http://images.mapillary.com/_key/thumb-320.jpg" width="250" height="187">'
+        + '<a href="https://www.mapillary.com/map/im/_key/photo">'
+        + '<img src="https://images.mapillary.com/_key/thumb-320.jpg" width="250" height="187">'
         + '</a>';
 
     function showMapillary() {

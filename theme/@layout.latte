@@ -121,6 +121,16 @@
 
 {define osmczmap}
 <div id="map-container">
+    <div id="map-sidebar">
+        <div class="sidebar-inner">
+            <button type="button" id="sidebar-close-button" class="close" onclick="$(this).parent().parent().hide()"><span aria-hidden="true">&times;</span></button>
+            <div id="sidebar-content">
+              <h2>Ahoj</h2>
+              <p>Zde se normalne nachazi uzitecne informace</p>
+            </div>
+        </div>
+    </div>
+
     <div id="map-layers">
         <div class="sidebar-inner">
             <button type="button" class="close"><span
@@ -201,12 +211,18 @@
     <script src="/theme/lib/osm_geojson.js"></script>
 
 
+      <!-- https://github.com/exif-js/exif-js -->
+      <script src="{!'/theme/lib/exif.js'|modified}"></script>
+
 
     <!-- github.com/zimmicz/Leaflet-Coordinates-Control -->
     <script src="{!'/theme/js/lib-Leaflet-Coordinates-Control.js'|modified}"></script>
     <script src="{!'/theme/js/lib-component-querystring.js'|modified}"></script>
     <script src="{!'/theme/js/lib-osm.js'|modified}"></script>
     <script src="{!'/theme/js/TileLayer.GeoJSON.js'|modified}"></script>
+
+
+
 
     <!-- ------------ /vendor ------------ -->
 
@@ -217,6 +233,7 @@
     <script src="{!'/theme/js/layers.js'|modified}"></script>
     <script src="{!'/theme/js/layer-switcher.js'|modified}"></script>
     <script src="{!'/theme/js/controls.js'|modified}"></script>
+    <script src="{!'/theme/js/gp-check.js'|modified}"></script>
     <script src="{!'/theme/js/guideposts.js'|modified}"></script>
     <script src="{!'/theme/js/icons-service.js'|modified}"></script>
     <script src="{!'/theme/js/opening-hours-service.js'|modified}"></script>
