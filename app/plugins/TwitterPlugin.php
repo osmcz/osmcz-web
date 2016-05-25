@@ -23,8 +23,8 @@ class TwitterPlugin extends Control
 
         $TweetPHP = new TweetPHP($this->config + array(
                 'twitter_screen_name' => 'osmcz',
-                'tweets_to_display' => 20,
-                'tweets_to_retrieve' => 20,
+                'tweets_to_display' => 40,
+                'tweets_to_retrieve' => 40,
                 'ignore_retweets' => false,
                 'date_lang' => 'cs_CZ',
                 'cachetime' => 120,
