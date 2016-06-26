@@ -15,6 +15,6 @@ $container->router[1][] = new Route('<osmtype (node|way|relation)>/<osmid [0-9]+
         'presenter' => 'Pages',
         'action' => 'default',
         'id_page' => 1, //TODO default page from config (but matched only when '/' page missing)
-    ));
+    ), $_SERVER['HTTPS'] ? Route::SECURED : false);
 foreach($oldFrontRouter as $r) $container->router[1][] = $r;
   

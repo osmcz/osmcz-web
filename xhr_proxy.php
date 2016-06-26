@@ -7,7 +7,7 @@ if(!$url) exit;
 
 //$referer = (isset($_SERVER['HTTP_REFERER'])) ? strtolower($_SERVER['HTTP_REFERER']) : false;
 //$is_allowed = $referer && strpos($referer, strtolower($_SERVER['SERVER_NAME'])) !== false;
-$is_allowed = true;
+$is_allowed = preg_match("~^https?://~", $url);
 
 $json = ($is_allowed) ? utf8_encode(file_get_contents($url)) : 'You are not allowed to use this proxy!';
 

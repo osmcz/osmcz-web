@@ -17,11 +17,16 @@ RewriteEngine On
 RewriteBase /
 
 
+RewriteCond %{HTTPS} !on
+RewriteCond %{HTTP_HOST} ^(www.)?openstreetmap.cz$
+RewriteRule ^.*$ https://openstreetmap.cz/$0 [R=301,L]
+
+
 ##
 ## Uncomment to prefer www-prefixed domain name
 ##
 RewriteCond %{HTTP_HOST} ^www.openstreetmap.cz$
-RewriteRule ^.*$ http://openstreetmap.cz/$0 [R=301,L]
+RewriteRule ^.*$ https://openstreetmap.cz/$0 [R=301,L]
 
 
 ##
@@ -53,4 +58,3 @@ RewriteRule .* index.php [NE,L]
 #php_value upload_max_filesize 100M
 #php_value post_max_size 100M
 ###php_value upload_tmp_dir temporarydir
-
