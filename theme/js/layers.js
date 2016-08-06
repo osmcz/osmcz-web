@@ -7,14 +7,14 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
     var devicePixelRatio = window.devicePixelRatio || 1,
         retinaSuffix = devicePixelRatio >= 2 ? '@2x' : '';
     var osmAttr = '&copy; <a href="https://openstreetmap.org/copyright">OSM</a>'; //abbrevation not recommended on other websites
-    var httpsProxy = 'https://openstreetmap.cz/proxy.php/';
+    var fakeHttps = location.host === 'openstreetmap.cz' ? '/proxy.php/' : 'http://';
 
     var mapbox = L.tileLayer('https://{s}.tiles.mapbox.com/v4/mapbox.streets-basic/{z}/{x}/{y}' + retinaSuffix + '.png?access_token=pk.eyJ1IjoiemJ5Y3oiLCJhIjoiRUdkVEMzMCJ9.7eJ3YhCQtbVUET92En5aGA', {
         attribution: osmAttr + ", <a href='https://www.mapbox.com/about/maps/'>Mapbox</a>",
         osmczDefaultLayer: true
     });
 
-    var turisticka = L.tileLayer(httpsProxy + "tile.poloha.net/{z}/{x}/{y}.png", {
+    var turisticka = L.tileLayer(fakeHttps + "tile.poloha.net/{z}/{x}/{y}.png", {
         maxZoom: 20,
         attribution: osmAttr + ', <a href="http://www.poloha.net">poloha.net</a>', // @TODO: upravit, až bude funkční HTTPS verze
         code: 'k'
@@ -32,19 +32,19 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
         code: 'd'
     });
 
-    var ocm = L.tileLayer(httpsProxy + "{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png", {
+    var ocm = L.tileLayer(fakeHttps + "{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png", {
         maxZoom: 18,
         attribution: osmAttr + ', <a href="http://opencyclemap.org">OpenCycleMap</a>', // @TODO: upravit, až bude HTTPS verze
         code: 'c'
     });
 
-    var hikebike = L.tileLayer(httpsProxy + "toolserver.org/tiles/hikebike/{z}/{x}/{y}.png", {
+    var hikebike = L.tileLayer(fakeHttps + "toolserver.org/tiles/hikebike/{z}/{x}/{y}.png", {
         maxZoom: 18,
         attribution: osmAttr + ', <a href="http://www.hikebikemap.org">Hike &amp; Bike Map</a>', // @TODO: upravit, až bude HTTPS verze
         code: 'h'
     });
 
-    var mtb = L.tileLayer(httpsProxy + "tile.mtbmap.cz/mtbmap_tiles/{z}/{x}/{y}.png", {
+    var mtb = L.tileLayer(fakeHttps + "tile.mtbmap.cz/mtbmap_tiles/{z}/{x}/{y}.png", {
         maxZoom: 18,
         attribution: osmAttr + ', <a href="http://www.mtbmap.cz">mtbmap.cz</a>', // @TODO: upravit, až bude HTTPS verze
         code: 'm'
@@ -62,13 +62,13 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
         code: 't'
     });
 
-    var opnv = L.tileLayer(httpsProxy + "tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png", {
+    var opnv = L.tileLayer(fakeHttps + "tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png", {
         maxZoom: 18,
         attribution: osmAttr + ', <a href="http://www.öpnvkarte.de/">öpnvkarte</a>', // @TODO: upravit, až bude HTTPS verze
         code: 'ö'
     });
 
-    var menepopisku = L.tileLayer(httpsProxy + "{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}" + retinaSuffix + ".png", {
+    var menepopisku = L.tileLayer(fakeHttps + "{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}" + retinaSuffix + ".png", {
         maxZoom: 18,
         attribution: osmAttr + ', <a href="https://cartodb.com/attributions#basemaps">CartoDB</a>',
         code: 'b'
@@ -114,7 +114,7 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
     // --- overlays
 
 
-    var turistikaOverlay = L.tileLayer(httpsProxy + "tile.poloha.net/kct/{z}/{x}/{y}.png", {
+    var turistikaOverlay = L.tileLayer(fakeHttps + "tile.poloha.net/kct/{z}/{x}/{y}.png", {
         maxZoom: 20,
         attribution: osmAttr + ', <a href="http://www.poloha.net">poloha.net</a>', // @TODO: upravit, až bude HTTPS verze
         opacity: 0.6,
@@ -137,7 +137,7 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
         code: 'V'
     });
 
-    var zimniOverlay = L.tileLayer(httpsProxy + "www.opensnowmap.org/opensnowmap-overlay/{z}/{x}/{y}.png", {
+    var zimniOverlay = L.tileLayer(fakeHttps + "www.opensnowmap.org/opensnowmap-overlay/{z}/{x}/{y}.png", {
         maxZoom: 18,
         attribution: osmAttr + ', <a href="http://www.opensnowmap.org">opensnowmap.org</a>', // @TODO: upravit, až bude HTTPS verze
         code: 'Z'

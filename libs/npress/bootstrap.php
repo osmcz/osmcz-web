@@ -63,7 +63,7 @@ dibi::connect($container->params['database']);
 
 // Setup router
 $container->router[] = $adminRouter = new RouteList('Admin');
-$adminRouter[] = new Route('admin/<presenter>/<action>[/<id_page>]', 'Admin:default', $_SERVER['HTTPS'] ? Route::SECURED : false);
+$adminRouter[] = new Route('admin/<presenter>/<action>[/<id_page>]', 'Admin:default', isset($_SERVER['HTTPS']) ? Route::SECURED : false);
 
 $container->router[] = $frontRouter = new RouteList('Front');
 $frontRouter[] = new Route('data/thumbs/<id>[.<opts>].png', 'Files:preview');

@@ -20,11 +20,10 @@ and
 
  (c) 2016 osmcz-app, https://github.com/osmcz/osmcz
 
- */
+*/
 
 var osmcz = osmcz || {};
 osmcz.guideposts = function(map, baseLayers, overlays, controls) {
-    // -- constructor --
 
     var layersControl = controls.layers;
     var xhr;
@@ -188,7 +187,16 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
 
     map.on('click', function(e) {
         if (moving_flag) {
-            create_moving_marker(e.latlng.lat, e.latlng.lng);
+            if (!moving_marker) {
+                var position = L.latLng(e.latlng.lat, e.latlng.lng);
+                create_moving_marker(e.latlng.lat, e.latlng.lng);
+                update_sidebar(get_distance(moving_marker, position), position.lat, position.lng);
+            } else {
+                //move marker to clicked position (to prevent losing it)
+                var new_position = L.latLng(e.latlng.lat, e.latlng.lng);
+                update_sidebar(get_distance(moving_marker, new_position), new_position.lat, new_position.lng);
+                moving_marker.setLatLng(new_position)
+            }
         }
     });
 
@@ -201,9 +209,16 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
 
     // -- methods --
 
+    function get_distance(marker, new_pos)
+    {
+      var position = marker.getLatLng();
+      var origposition = L.latLng(gp_lat, gp_lon);
+      return position.distanceTo(origposition);
+    }
+
     function create_moving_marker(lat, lon)
     {
-        moving_marker = L.marker(new L.LatLng(lat, lon), {
+        moving_marker = new L.marker(new L.LatLng(lat, lon), {
           draggable: true
         });
 
@@ -227,13 +242,14 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
 
         moving_marker.bindPopup('Presuň mě na cílové místo');
         moving_marker.addTo(map);
-        moving_flag = false; //user will now interact with placed marker until he is done
+        //moving_flag = false; //user will now interact with placed marker until he is done
     }
 
     function destroy_moving_marker()
     {
         map.removeLayer(moving_marker);
-        delete moving_marker;
+//        moving_marker.clearLayers();
+        moving_marker = null;
     }
 
     osmcz.guideposts.prototype.cancel_moving = function()
@@ -271,6 +287,8 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
         .always(function(data) {
         });
 
+        note.note_api(1,1,"nazdar");
+
         hide_sidebar();
     }
 
@@ -299,14 +317,15 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
         var content = document.getElementById("sidebar-content");
         content.innerHTML = "<h1>Přesun rozcestníku</h1>";
         content.innerHTML += "<p>Vyberte novou pozici a stiskněte tlačítko [Přesunout sem]</p>";
-//  content.innerHTML += "<h2>Informace</h2>";
-//  content.innerHTML += "<p>id:" + gp_id + "</p>";
         content.innerHTML += "<h3>Současná pozice</h3>";
         content.innerHTML += "<p>lat, lon:</p>";
         content.innerHTML += "<p>" + gp_lat.toFixed(6) + "," + gp_lon.toFixed(6) + "</p>";
         content.innerHTML += "<h3>Přesunujete na</h3>";
         content.innerHTML += "<div id='guidepost_move_info'>";
+        content.innerHTML += "Klikněte do mapy";
         content.innerHTML += "</div>";
+        content.innerHTML += "<h3>poslat informaci</h3>";
+        content.innerHTML += "<textarea rows='1' cols='15'>id:" + gp_id + "moje zprava</textarea>";
         content.innerHTML += "<hr>";
         content.innerHTML += "<button class='btn btn-default btn-xs' onclick='javascript:guideposts.finish_moving()'>Přesunout sem</button>";
         content.innerHTML += "<button class='btn btn-default btn-xs' onclick='javascript:guideposts.cancel_moving()'>Zrušit</button>";
@@ -402,7 +421,6 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
         hc += "  <script>";
         hc += "    $('sidebar-close-button').on('click', function(e) {";
         hc += "      $('document').trigger('sidebar-close')";
-        hc += "      alert('x')";
         hc += "    });";
         hc += "  </script>";
         hc += "  <div id='sidebar-content'>";
