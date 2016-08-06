@@ -189,10 +189,17 @@
     <!-- opening_hours from http://openingh.openstreetmap.de/opening_hours.js/opening_hours+deps.min.js at 6 Apr 2016 -->
     <script src='/theme/lib/opening_hours+deps.min.js'></script>
 
+    <!-- leaflet.coordinates -->
+    <script src='https://cdn.rawgit.com/MrMufflon/Leaflet.Coordinates/v0.1.5/dist/Leaflet.Coordinates-0.1.5.min.js'></script>
+    <link href='https://cdn.rawgit.com/MrMufflon/Leaflet.Coordinates/v0.1.5/dist/Leaflet.Coordinates-0.1.5.css' rel='stylesheet'/>
 
     <!-- https://github.com/aaronlidman/osm-and-geojson/blob/1633d1ab42dee97cbdc0ce5611b71c1e5d336f90/osm_geojson.js -->
     <script src="/theme/lib/osm_geojson.js"></script>
 
+
+
+    <!-- github.com/zimmicz/Leaflet-Coordinates-Control -->
+    <script src="{!'/theme/js/lib-Leaflet-Coordinates-Control.js'|modified}"></script>
     <script src="{!'/theme/js/lib-component-querystring.js'|modified}"></script>
     <script src="{!'/theme/js/lib-osm.js'|modified}"></script>
     <script src="{!'/theme/js/TileLayer.GeoJSON.js'|modified}"></script>
@@ -201,12 +208,14 @@
 
     <!-- ------------ app ------------ -->
     <link href="{!'/theme/css/map-style.css'|modified}" rel="stylesheet">
+    <script src="{!'/theme/js/lib-gps-formats-convert.js'|modified}"></script>
 
     <script src="{!'/theme/js/layers.js'|modified}"></script>
     <script src="{!'/theme/js/layer-switcher.js'|modified}"></script>
     <script src="{!'/theme/js/controls.js'|modified}"></script>
     <script src="{!'/theme/js/guideposts.js'|modified}"></script>
     <script src="{!'/theme/js/icons-service.js'|modified}"></script>
+    <script src="{!'/theme/js/opening-hours-service.js'|modified}"></script>
     <script src="{!'/theme/js/poi-popup.js'|modified}"></script>
     <script src="{!'/theme/js/active-layer.js'|modified}"></script>
     <script src="{!'/theme/js/osmcz.js'|modified}"></script>

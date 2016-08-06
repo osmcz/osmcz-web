@@ -29,6 +29,9 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
     var layersControl = controls.layers;
     var xhr;
     var markers = L.markerClusterGroup({code: 'G'});
+    var moving_marker;
+    var autoload_lock = false;
+    var moving_flag = false;
 
     var guidepost_icon = L.icon({
       iconUrl: osmcz.basePath + "img/guidepost.png",
@@ -42,9 +45,11 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
       iconAnchor: [17, 0]
     });
 
-
     var layer_guidepost = new L.GeoJSON(null, {
         onEachFeature: function (feature, layer) {
+
+            layer.on('click', function(e) {autoload_lock = true;});
+
             var b = feature.properties;
 
             if (!b.ref) {
@@ -69,6 +74,7 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
               offset: new L.Point(1, -32),
               minWidth: 500,
               closeOnClick: false,
+              autoPan: false,
             });
         }
     });
@@ -82,14 +88,22 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
         }
     });
 
+    map.on('popupclose', function(e) {
+      autoload_lock = false;
+    });
 
     map.on('layeradd', function(event) {
-        if(event.layer == markers) {
-            load_data()
+        if(event.layer == markers && !autoload_lock) {
+//        load_data();
         }
     });
 
-    map.on('moveend', load_data);
+    map.on('moveend', function(event) {
+        if(!autoload_lock) {
+            load_data();
+      }
+    });
+
     map.on('drag', function (e) {
         if (!isLayerChosen())
             return;
@@ -100,12 +114,19 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
             xhr.abort();
         }
     });
+
     map.on('movestart', function (e) {
         if (!isLayerChosen())
             return;
 
         if (typeof xhr !== 'undefined') {
             xhr.abort();
+        }
+    });
+
+    map.on('click', function(e) {
+        if (moving_flag) {
+            create_moving_marker(e.latlng.lat, e.latlng.lng);
         }
     });
 
@@ -116,13 +137,47 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
      * This allows restoration of overlay state on load */
     overlays["Foto rozcestníků"] = markers;
 
-
     // -- methods --
+
+    function create_moving_marker(lat, lon)
+    {
+        moving_marker = L.marker(new L.LatLng(lat, lon), {
+          draggable: true
+        });
+        moving_marker.bindPopup('Presun me na cilove misto');
+        moving_marker.addTo(map);
+        moving_flag = false; //user will now interact with placed marker until hi hit done
+    }
+
+    function destroy_moving_marker()
+    {
+        map.removeLayer(moving_marker);
+        delete moving_marker;
+    }
+
+    osmcz.guideposts.prototype.finish_moving = function()
+    {
+      moving_flag = false;
+      if (moving_marker) {
+        final_lat = moving_marker.getLatLng().lat;
+        final_lon = moving_marker.getLatLng().lng;
+        destroy_moving_marker();
+      } else {
+        alert ("Vyberte novou pozici");
+      }
+      //make ajax call
+    }
+
+    osmcz.guideposts.prototype.move_point = function()
+    {
+        if (!moving_flag) {
+            moving_flag = true;
+        }
+    }
 
     function isLayerChosen() {
         return map.hasLayer(markers);
     }
-
 
     function request_from_url(url, success_callback, error_callback)
     {
@@ -143,7 +198,9 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
         });
 
     }
+
     function load_data() {
+
         if (!isLayerChosen())
             return;
 
