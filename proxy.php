@@ -16,3 +16,5 @@ foreach ($http_response_header as $r)
 header('Server: openstreetmap.cz-proxy');
 
 echo $content;
+
+?>
