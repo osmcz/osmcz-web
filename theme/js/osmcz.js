@@ -1,4 +1,4 @@
-var OSMCZ_APP_VERSION = '0.8';
+var OSMCZ_APP_VERSION = '0.9';
 
 var osmcz = osmcz || {};
 osmcz.basePath = ['openstreetmap.cz', 'osmap.cz', 'osm.localhost'].indexOf(location.hostname) !== -1 ? '/theme/' : '';
@@ -21,6 +21,7 @@ function initmap() {
     new osmcz.controls(map, baseLayers, overlays, controls);
 
     // -------------------- modules --------------------
+    note = new osmcz.note();
     guideposts = new osmcz.guideposts(map, baseLayers, overlays, controls);
     gpcheck = new osmcz.gpcheck(map, baseLayers, overlays, controls);
     new osmcz.poiPopup(map);
