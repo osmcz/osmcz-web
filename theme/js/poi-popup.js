@@ -16,6 +16,7 @@ osmcz._map = false;
 
 // static methods
 osmcz.poiPopup.load = function (object) {
+    var fakeHttps = location.host === 'openstreetmap.cz' ? '/proxy.php/' : 'http://';
 
     // exit when osm object does not exists or osmid is null
     if ((! object) || (! "id" in object) ) {
@@ -391,9 +392,8 @@ osmcz.poiPopup.getHtml = function (feature, icon, embedded) {
         }
         else {
             var ref = feature.properties.tags.ref;
-            var osmczApiPrefix = (location.host === 'openstreetmap.cz') ? '/proxy.php/' : 'http://'; // @TODO: upravit, až bude HTTPS verze
             $.ajax({
-                url: osmczApiPrefix + 'api.openstreetmap.cz/table/close?lat=' + lat + '&lon=' + lon + '&distance=50&limit=1',
+                url: 'https://api.openstreetmap.cz/table/close?lat=' + lat + '&lon=' + lon + '&distance=50&limit=1', // @TODO: upravit, až bude HTTPS verze
                 //url: 'http://api.openstreetmap.cz/table/ref/' + ref,
                 data: {
                     outputFormat: 'application/json',
@@ -462,7 +462,7 @@ osmcz.poiPopup.getHtml = function (feature, icon, embedded) {
     // "_key" se nahrazuje OSM IDčkem
     var mpTpl = '<h5>Nejbližší foto</h5>'
         + '<a href="https://www.mapillary.com/map/im/_key/photo">'
-        + '<img src="https://images.mapillary.com/_key/thumb-320.jpg" width="250" height="187">'
+        + '<img src="' + fakeHttps + 'images.mapillary.com/_key/thumb-320.jpg" width="250" height="187">'
         + '</a>';
 
     function showMapillary() {
