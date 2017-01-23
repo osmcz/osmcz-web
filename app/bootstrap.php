@@ -9,11 +9,15 @@ FileTemplate::extensionMethod('modified', function ($that, $s) {
 });
 
 
+Route::$defaultFlags = Route::SECURED;
+
+// add some osmcz routes before everything
 $oldFrontRouter = $container->router[1];
 $container->router[1] = new RouteList('Front');
 $container->router[1][] = new Route('<osmtype (node|way|relation)>/<osmid [0-9]+>', array( //default route
         'presenter' => 'Pages',
         'action' => 'default',
-        'id_page' => 1, //TODO default page from config (but matched only when '/' page missing)
-    ), isset($_SERVER['HTTPS']) ? Route::SECURED : false);
+        'id_page' => 1,
+    ));
 foreach($oldFrontRouter as $r) $container->router[1][] = $r;
+
