@@ -4,6 +4,11 @@ define("DONT_RUN_NPRESS_APP", true);
 require_once "index.php";
 error_reporting(0);
 
+if(!function_exists('gzdecode')){
+  function gzdecode($data){
+    return gzinflate(substr($data, 10, -8));
+  }
+}
 
 // get current mbox archive
 $url = "https://lists.openstreetmap.org/pipermail/talk-cz/" . date('Y-F') . ".txt";
@@ -12,7 +17,6 @@ if (!$mbox) {
     $url .= ".gz";
     $mbox = gzdecode(file_get_contents($url));
 }
-
 
 dibi::query('DELETE FROM mailarchive WHERE YEAR(`date`) = %i', date('Y'), ' AND MONTH(`date`) = %i', date('n'));
 insertMailsFromMbox($mbox);
