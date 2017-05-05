@@ -120,6 +120,8 @@ class Front_OauthPresenter extends Front_BasePresenter
         foreach ($user as &$val)
             $val = strval($val);
 
+        $user['account_created'] = new DateTime($user['account_created']);
+
         // update db
         $row = dibi::fetch('SELECT * FROM users WHERE id = %i', $user['id']);
         if ($row) {
