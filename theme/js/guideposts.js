@@ -1,7 +1,7 @@
 /*
  guideposts for osmcz
  Javascript code for openstreetmap.cz website
- Copyright (C) 2015,2016
+ Copyright (C) 2015-2017
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -23,26 +23,59 @@ and
 */
 
 var osmcz = osmcz || {};
-osmcz.guideposts = function(map, baseLayers, overlays, controls) {
+osmcz.guideposts = function(map, baseLayers, overlays, controls, group) {
 
     var layersControl = controls.layers;
+    var photoDBbtn = null;
     var xhr;
-    var markers = L.markerClusterGroup({code: 'G'});
+    var markers = L.markerClusterGroup({code: 'G', chunkedLoading: true, chunkProgress: update_progress_bar});
     var moving_marker;
     var autoload_lock = false;
     var moving_flag = false;
     var gp_id;
     var gp_lat;
     var gp_lon;
+    var popupMarker; // Last marker which popup was opened
+    var gp_popupMarker; // Marker that is used in Move guidepost dialog
+    var popupThumbnail;
+
+    // Highlight selected guidepost and connect it to new position
+    var gpCircle = new L.circle([0, 0], {radius: 20});
+    var gpMarkerPolyline = L.polyline([[0, 0], [0, 0]],  {color: 'purple', clickable: false, dashArray: '20,30', opacity: 0.8});
+
 
     var guidepost_icon = L.icon({
-      iconUrl: osmcz.basePath + "img/guidepost.png",
+      iconUrl: osmcz.basePath + "img/gp/guidepost.png",
+      iconSize: [48, 48],
+      iconAnchor: [23, 45]
+    });
+
+    var cycle_icon = L.icon({
+      iconUrl: osmcz.basePath + "img/gp/cycle.png",
+      iconSize: [48, 48],
+      iconAnchor: [23, 45]
+    });
+
+    var cycle_foot_icon = L.icon({
+      iconUrl: osmcz.basePath + "img/gp/cycle_foot.png",
       iconSize: [48, 48],
       iconAnchor: [23, 45]
     });
 
     var infopane_icon = L.icon({
-      iconUrl: osmcz.basePath + "img/infopane.png",
+      iconUrl: osmcz.basePath + "img/gp/infopane.png",
+      iconSize: [48, 48],
+      iconAnchor: [23, 45]
+    });
+
+    var map_icon = L.icon({
+      iconUrl: osmcz.basePath + "img/gp/map.png",
+      iconSize: [48, 48],
+      iconAnchor: [23, 45]
+    });
+
+    var blurred_icon = L.icon({
+      iconUrl: osmcz.basePath + "img/gp/blurred.png",
       iconSize: [48, 48],
       iconAnchor: [23, 45]
     });
@@ -83,9 +116,23 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
 
             var ftype;
 
-            if (b.tags && b.tags.indexOf("infotabule") > -1) {
-              ftype = "infopane";
-            } else {
+            if (b.tags) {
+                if (b.tags.indexOf("necitelne") > -1) {
+                    ftype = "necitelne";
+                } else if (b.tags.indexOf("infotabule") > -1) {
+                    ftype = "infopane";
+                } else if (b.tags.indexOf("mapa") > -1) {
+                    ftype = "map";
+                } else if (b.tags.indexOf("cyklo") > -1 &&
+                           b.tags.indexOf("pesi") == -1) {
+                    ftype = "cycle";
+                } else if (b.tags.indexOf("cyklo") > -1 &&
+                           b.tags.indexOf("pesi") > -1) {
+                    ftype = "cycle_foot";
+                }
+            }
+
+            if (!ftype) {
               ftype = "guidepost";
             }
 
@@ -103,7 +150,8 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
               html_content += "<br>";
             }
             html_content += "<a href='https://api.openstreetmap.cz/" + b.url + "'>";
-            html_content += "<img src='https://api.openstreetmap.cz/" + b.url + "' width='180' alt='" + b.name + "'>";
+            html_content += "<div id='thumbnailLoadSpinner" + b.id + "' class='text-center'><br><span class='glyphicon glyphicon-refresh text-info gly-spin'></span></div>";
+            html_content += "<img id='thumbnailImage" + b.id + "' src='' class='center-block' width='180' />";
             html_content += "</a>";
 
             html_content += "<div id='hashtags'>" + parse_hashtags(b.tags) + "</div>";
@@ -123,10 +171,24 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
             html_content += "</a>";
             html_content += "</div>";
 
-            if (ftype == "infopane") {
-              layer.setIcon(infopane_icon);
-            } else {
-              layer.setIcon(guidepost_icon);
+            switch (ftype) {
+                case "infopane":
+                    layer.setIcon(infopane_icon);
+                    break;
+                case "map":
+                    layer.setIcon(map_icon);
+                    break;
+                case "cycle":
+                    layer.setIcon(cycle_icon);
+                    break;
+                case "cycle_foot":
+                    layer.setIcon(cycle_foot_icon);
+                    break;
+                case "necitelne":
+                    layer.setIcon(blurred_icon);
+                    break;
+                default:
+                    layer.setIcon(guidepost_icon);
             }
 
             layer.bindPopup(html_content, {
@@ -134,6 +196,7 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
               minWidth: 500,
               closeOnClick: false,
               autoPan: false,
+              className: 'guideposts-popup'
             });
         }
     });
@@ -145,7 +208,36 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
             layer.bindPopup(feature.properties.desc, {
               closeOnClick: false,
               autoPan: false,
+              className: 'guideposts-popup'
             });
+        }
+    });
+
+    map.on('popupopen', function(e) {
+        // get guidepost thumbnail from photodb cache server first
+        // if it fails, request it from phpThumb
+        popupMarker = e.popup._source;
+        var imgName = e.popup._source.feature.properties.name;
+        var imgUrl  = e.popup._source.feature.properties.url;
+        var id      = e.popup._source.feature.properties.id;
+        if (imgName) {
+            var tb = new Image();
+            tb.onload = function(){
+                popupThumbnail = tb.src;
+                $('#thumbnailLoadSpinner'+id).hide();
+                $('#thumbnailImage'+id).attr('src', tb.src);
+            };
+            tb.onerror = function(){
+                var tbUrl = 'https://api.openstreetmap.cz/p/phpThumb.php?sia='+ imgName +'&w=250&src=https://api.openstreetmap.cz/' + imgUrl;
+                if (tb.src != tbUrl ) {
+                    tb.src = tbUrl;
+                } else {
+                    $('#thumbnailLoadSpinner'+id).html('<br><span class="glyphicon glyphicon-picture bigger semigrey thumbnail crossed" title="Náhled není k dispozici."><span><br>');
+                    $('#thumbnailLoadSpinner'+id).attr('class','text-nowrap text-center');
+
+                }
+            };
+            tb.src = "https://osm.fit.vutbr.cz/photodb/250px/" + imgName;
         }
     });
 
@@ -153,9 +245,42 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
       autoload_lock = false;
     });
 
+    // TODO
+    map.on('zoomend', function(e) {
+        if (map.hasLayer(gpCircle)) {
+            if (map.getZoom() > 17) {
+                gpCircle.setRadius(10);
+            } else if (map.getZoom() > 15) {
+                gpCircle.setRadius(20);
+            } else if (map.getZoom() > 12) {
+                gpCircle.setRadius(40);
+            } else if (map.getZoom() > 10) {
+                gpCircle.setRadius(80);
+            } else if (map.getZoom() > 5) {
+                gpCircle.setRadius(160);
+            } else {
+                gpCircle.setRadius(500);
+            }
+        }
+    });
+
     map.on('layeradd', function(event) {
         if(event.layer == markers && !autoload_lock) {
 //        load_data();
+            // PhotoDB button (add an image)
+            if (!photoDBbtn) {
+                photoDBbtn = L.control.photoDbGui().addTo(map);
+            }
+        }
+    });
+
+    map.on('layerremove', function(event) {
+        if(event.layer == markers) {
+            // PhotoDB button (add an image)
+            if (photoDBbtn) {
+                photoDBbtn.remove(map);
+                photoDBbtn = null;
+            }
         }
     });
 
@@ -190,22 +315,23 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
             if (!moving_marker) {
                 var position = L.latLng(e.latlng.lat, e.latlng.lng);
                 create_moving_marker(e.latlng.lat, e.latlng.lng);
+                gpMarkerPolyline.setLatLngs([[gp_lat, gp_lon], position]).addTo(map);
                 update_sidebar(get_distance(moving_marker, position), position.lat, position.lng);
             } else {
                 //move marker to clicked position (to prevent losing it)
                 var new_position = L.latLng(e.latlng.lat, e.latlng.lng);
                 update_sidebar(get_distance(moving_marker, new_position), new_position.lat, new_position.lng);
                 moving_marker.setLatLng(new_position)
+                gpMarkerPolyline.setLatLngs([[gp_lat, gp_lon], new_position]);
             }
         }
     });
-
     /* Add overlay to the map */
-    layersControl.addOverlay(markers, "Foto rozcestníků");
+    layersControl.addOverlay(markers, "Foto rozcestníků", group);
 
     /* Add overlay to the overlays list as well
      * This allows restoration of overlay state on load */
-    overlays["Foto rozcestníků"] = markers;
+    overlays[group]["Foto rozcestníků"] = markers;
 
     // -- methods --
 
@@ -230,6 +356,7 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
             var distance = position.distanceTo(origposition);
 
             update_sidebar(distance, position.lat, position.lng);
+            gpMarkerPolyline.setLatLngs([[gp_lat, gp_lon], position]);
         })
         .on('dragend', function(event){
             var marker = event.target;
@@ -238,6 +365,7 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
             var distance = position.distanceTo(origposition);
 
             update_sidebar(distance, position.lat, position.lng);
+            gpMarkerPolyline.setLatLngs([[gp_lat, gp_lon], position]);
         });
 
         moving_marker.bindPopup('Presuň mě na cílové místo');
@@ -287,7 +415,7 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
         .always(function(data) {
         });
 
-        note.note_api(final_lat, final_lon, document.getElementById("gp_usr_message").value);
+        note.note_api(final_lat, final_lon, "id:" + gp_id + ": " + document.getElementById("gp_usr_message").value);
 
         hide_sidebar();
     }
@@ -296,39 +424,47 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
     {
         var info = document.getElementById("guidepost_move_info");
 
-        info.innerHTML = "<p>lat, lon:</p>";
-        info.innerHTML += lat.toFixed(6) + "," + lon.toFixed(6) + "<br>";
-        info.innerHTML += "Vzdálenost " + distance.toFixed(1) + "m";
+        info.innerHTML  = "<label for='lln'>lat, lon:</label>";
+        info.innerHTML += "<input type='text' class='form-control' id='lln' readonly value='" + lat.toFixed(6) + ", " + lon.toFixed(6) + "'>";
+        info.innerHTML += "<label for='lld'>Vzdálenost:</label>";
+        info.innerHTML += "<input type='text' class='form-control' id='lld' readonly value='" + distance.toFixed(1) + "m" + "'>";
     }
 
     function hide_sidebar()
     {
-        var sidebar = document.getElementById("map-sidebar");
-        sidebar.style.display = "none";
+        sidebar.hide();
+        popupMarker.setOpacity(1);
+        popupMarker = null;
+        map.removeLayer(gpCircle);
+        map.removeLayer(gpMarkerPolyline);
     }
 
     function show_sidebar()
     {
-        sidebar_init();
+        sidebar.setContent(sidebar_init());
+        sidebar.on('hidden', guideposts.cancel_moving);
+        sidebar.show();
 
-        var sidebar = document.getElementById("map-sidebar");
-        sidebar.style.display = "block";
-
+        var inner = [];
         var content = document.getElementById("sidebar-content");
-        content.innerHTML = "<h1>Přesun rozcestníku</h1>";
-        content.innerHTML += "<p>Vyberte novou pozici a stiskněte tlačítko [Přesunout sem]</p>";
-        content.innerHTML += "<h3>Současná pozice</h3>";
-        content.innerHTML += "<p>lat, lon:</p>";
-        content.innerHTML += "<p>" + gp_lat.toFixed(6) + "," + gp_lon.toFixed(6) + "</p>";
-        content.innerHTML += "<h3>Přesunujete na</h3>";
-        content.innerHTML += "<div id='guidepost_move_info'>";
-        content.innerHTML += "Klikněte do mapy";
-        content.innerHTML += "</div>";
-        content.innerHTML += "<h3>poslat informaci</h3>";
-        content.innerHTML += "<textarea rows='1' cols='15' id='gp_usr_message'>id:" + gp_id + "moje zprava</textarea>";
-        content.innerHTML += "<hr>";
-        content.innerHTML += "<button class='btn btn-default btn-xs' onclick='javascript:guideposts.finish_moving()'>Přesunout sem</button>";
-        content.innerHTML += "<button class='btn btn-default btn-xs' onclick='javascript:guideposts.cancel_moving()'>Zrušit</button>";
+
+        inner.push("<h4>Přesun fotky</h4>");
+        inner.push("<p class='mark text-center'>Vyberte novou pozici a stiskněte tlačítko [Přesunout sem]");
+        inner.push("<h5>Současná pozice</h5>");
+        inner.push("<label for='llc'>lat, lon:</label>");
+        inner.push("<input type='text' class='form-control' id='llc' readonly value='" + gp_lat.toFixed(6) + ", " + gp_lon.toFixed(6) + "'>");
+        inner.push("<h5>Přesunout na</h5>");
+        inner.push("<div id='guidepost_move_info'><p class='mark text-center'>Klikněte do mapy</p>");
+        inner.push("</div>");
+        inner.push("<h5>Připojit zprávu</h5>");
+        inner.push("<textarea class='form-control' rows='3' id='gp_usr_message' placeholder='moje zpráva…'></textarea>");
+        inner.push("<hr>");
+        inner.push("<button class='btn btn-default btn-xs' onclick='javascript:guideposts.cancel_moving()'>Zrušit</button>");
+        inner.push("<button class='btn btn-default btn-xs pull-right' onclick='javascript:guideposts.finish_moving()'>Přesunout sem</button>");
+        inner.push("</div>");
+        inner.push("<hr><img class='thumbnail center-block' src='" + popupThumbnail + "'/>");
+
+        content.innerHTML = inner.join('');
     }
 
     osmcz.guideposts.prototype.move_point = function(gid, glat, glon)
@@ -339,6 +475,9 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
             gp_lat = glat;
             gp_lon = glon;
             show_sidebar();
+            popupMarker.setOpacity(0.5);
+            popupMarker.closePopup();
+            gpCircle.setLatLng([glat, glon]).addTo(map);
         }
     }
 
@@ -412,24 +551,26 @@ osmcz.guideposts = function(map, baseLayers, overlays, controls) {
 
     function sidebar_init()
     {
-        var sidebar = document.getElementById("map-sidebar");
         var hc = "";
 
         hc += "<div class='sidebar-inner'>";
         hc += "<!--sidebar from guideposts--> ";
-        hc += "<button type='button' id='sidebar-close-button' class='close' onclick='$(this).parent().parent().hide(); guideposts.cancel_moving();'><span aria-hidden='true'>&times;</span></button>";
-        hc += "  <script>";
-        hc += "    $('sidebar-close-button').on('click', function(e) {";
-        hc += "      $('document').trigger('sidebar-close')";
-        hc += "    });";
-        hc += "  </script>";
         hc += "  <div id='sidebar-content'>";
-        hc += "    <h2>Ahoj</h2>";
-        hc += "    <p>Zde se normalne nachazi uzitecne informace</p>";
         hc += "  </div>";
         hc += "</div>";
 
-        sidebar.innerHTML = hc;
+        return hc;
+    }
+
+    function update_progress_bar(processed, total, elapsed, layers_array) {
+      if (elapsed > 1000) {
+        // if it takes more than a second to load, display the progress bar:
+        // tbd see http://leaflet.github.io/Leaflet.markercluster/example/marker-clustering-realworld.50000.html
+      }
+
+      if (processed === total) {
+        // all markers processed - hide the progress bar:
+      }
     }
 
 };

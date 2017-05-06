@@ -1,5 +1,5 @@
 html {
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 body {
@@ -82,8 +82,30 @@ a:hover.as-text {
     width: 78px; /*allow overflow*/
 }
 
-
-
+.navbar #page-restore-button {
+    position: absolute;
+    left: 49%;    bottom: 0;  z-index: 5;
+    width: 68px;
+    height: 13px;
+    cursor: pointer;
+    color: #888;
+    display: none;
+}
+.navbar #page-restore-button:before {
+    content: "\e114";
+    position: relative;
+    top: -2px;
+    left: 24px;
+    font-size: 12px;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: 400;
+}
+.navbar #page-restore-button:hover {
+    border-bottom: 30px solid transparent; /* biggerbutton for finishing the click*/
+    margin-bottom: -17px;
+    color: #333;
+}
 
 #map-container {
     position:fixed;
@@ -91,12 +113,21 @@ a:hover.as-text {
     right: 0; left: 0;
     z-index: 1;
 }
-.sidebar-inner {padding: 15px;}
+
+.sidebar-inner {
+    padding: 15px;
+}
+@media (max-width: 767px) {
+    .sidebar-inner {
+        padding: 5px;
+    }
+}
+
 #map-container .close {font-size: 300%;}
 #map {
     height: 100%;
 }
-#map-sidebar, #map-layers {
+/*#map-sidebar, #map-layers {
     z-index: 3000;
     max-width: 250px;
     display: block;
@@ -106,21 +137,25 @@ a:hover.as-text {
     position: absolute;
     height: 100%;
     overflow-y: scroll;
-}
-
-#map-sidebar {
-    display: none;
-}
+}*/
 
 #map-layers {
     right:0;
-    width: 250px;
+/*     width: 250px; */
     text-align: left;
     font-size: 13px;
-    display: none;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
 }
-#map-layers h2 {
+
+@media (max-width: 992px) {
+    #map-layers {width: 180px;}
+}
+
+#map-layers h2, .h2 {
   margin: 10px 0;
+  font-size: 24px;
 }
 #map-layers label {
   display: block;
@@ -128,14 +163,44 @@ a:hover.as-text {
 #map-layers button.close {
   position: fixed;
   right: 20px;
+  top: 45px;
+}
+
+#map-layers div #ls-info {
+  margin-top: -20px;
+  margin-right: -50px;
+}
+
+.ls-info-body {
+  padding-top: 10px;
+  padding-bottom: 5px;
+}
+.btn-header {
+    padding: 10px 5px 0px 5px;
+    font-size: 150%;
+    color: black !important;
+}
+
+.btn-header:hover {
+    opacity: 0.6;
+}
+
+.flip {
+    -moz-transform: scaleY(-1);
+    -o-transform: scaleY(1);
+    -webkit-transform: scaleY(1);
+    transform: scaleY(-1);
+    filter: FlipH;
+    -ms-filter: "FlipH";
 }
 
 @media screen and (min-width: 768px) {
-    #map-sidebar, #map-layers {
+    #sidebar, #poi-sidebar, #map-layers {
         position: relative;
         float: left;
         height: 100%;
-        overflow: auto;
+        overflow-y: auto;
+        overflow-x: none;
     }
     #map-layers {
         float: right;
@@ -154,74 +219,217 @@ a:hover.as-text {
 #map-container a.leaflet-control-layers-toggle:before { content: "Mapové vrstvy"; }
 #map-container a.leaflet-control-layers-toggle:hover { text-decoration: none; }
 
+#map-container a.leaflet-control-photoDBbtn-text {
+    width: 46px;
+    height: 80px;
+    background-position: center 0px;
+    padding-top: 45px;
+    font-size: 10px;
+    color: #000 !important;
+    text-align: center;
+    display: block;
+    background-image: url(../img/gp/photoDB-add.png);
+    background-repeat: no-repeat;
+    text-decoration: none;
+}
+#map-container a.leaflet-control-photoDBbtn-text:before { content: "Přidat obrázek"; }
+#map-container a.leaflet-control-photoDBbtn-text:hover { text-decoration: none; }
 
-
-
-/* temporary solution, may be implemented as L.control */
-#map-searchbar {
+/* --------------------------- */
+/* Customized .leaflet-sidebar */
+.leaflet-sidebar {
     position: absolute;
-    background: rgba(255,255,255,0.95);
-    z-index: 1010;
     min-height: 40px;
     max-height: 100%;
     min-width: 250px;
     max-width: 350px;
-    border-bottom-right-radius: 5px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    z-index: 2000;
     overflow: hidden;
     overflow-y: auto;
+}
+.leaflet-sidebar.left {
+    left: -500px;
+    transition: left 0.2s, width 0.2s;
+    padding-right: 0;
+}
+.leaflet-sidebar.left.visible {
+    left: 0;
+}
+.leaflet-sidebar.right {
+    right: -250px;
+    height: 100%;
+    width: 250px;
+    transition: right 0.0s, width 0.0s;
+}
+.leaflet-sidebar.right.visible {
+    right: 0;
+}
+.leaflet-sidebar > .leaflet-control {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    font-size: 14px;
     padding: 10px;
+    background: rgba(255,255,255,0.95) !important;
+/*     box-shadow: 0 1px 7px rgba(0, 0, 0, 0.65); */
+}
+.leaflet-sidebar.left > .leaflet-control {
+    border-radius: 0 0 4px 0;
+}
 
-    display: none;
+.leaflet-touch .leaflet-sidebar > .leaflet-control {
+    box-shadow: none;
+    /*border: 2px solid rgba(0, 0, 0, 0.2);*/
+    background-clip: padding-box;
 }
-#map-container.searchbar-on .leaflet-top.leaflet-left {
-    //margin-top: 40px; // when search-input will be displayed - move controls
+
+.leaflet-sidebar .close {
+    position: absolute;
+    right: 20px;
+    cursor: pointer;
+    z-index: 800;
+    color: #000;
+    opacity: 0.6;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1;
 }
-#map-container.searchbar-on #map-searchbar {
-    display: block;
+
+.leaflet-left {
+  transition: left 0.2s;
 }
-#map-searchbar h4, h5 {
+
+.leaflet-right {
+    transition: right 0.0s;
+}
+
+.leaflet-sidebar {
+    width: 350px;
+}
+.leaflet-sidebar.left.visible ~ .leaflet-left {
+    left: 350px;
+}
+.leaflet-sidebar.right.visible ~ .leaflet-right {
+    right: 250px;
+}
+
+.sidebar-inner img {
+        max-width: 250px;
+    }
+
+#poi-sidebar img {
+        max-width: 250px;
+    }
+
+@media (max-width: 767px) {
+    .leaflet-sidebar {
+        width: 100%;
+        padding: 0;
+        min-width: 180px;
+    }
+    .leaflet-sidebar.left.visible ~ .leaflet-left {
+        left: 0px;
+    }
+    .leaflet-sidebar.right.visible ~ .leaflet-right {
+        right: 0px;
+    }
+    .leaflet-sidebar.left {
+        left: -200px;
+        width: 200px;
+    }
+    .leaflet-sidebar.left.visible {
+          left: 0;
+    }
+    .leaflet-sidebar.right {
+        right: -180px;
+        width: 180px;
+    }
+    .leaflet-sidebar.right.visible {
+          right: 0;
+    }
+    .leaflet-sidebar > .leaflet-control {
+        box-shadow: none;
+        -webkit-border-radius: 0;
+        border-radius: 0;
+    }
+    .leaflet-touch .leaflet-sidebar > .leaflet-control {
+        border: 0;
+    }
+/*     TODO: How to fix 'X' on left panel to top (in overflow)?
+    .left. visible + a.close {
+        position: fixed;
+        right: 240px;
+    } */
+
+    .sidebar-inner img {
+        max-width: 170px;
+    }
+    #poi-sidebar img {
+        max-width: 170px;
+    }
+}
+
+
+/* END of customized .leaflet-sidebar */
+
+#sidebar h4, h5 {
     border-bottom: 1px solid #aaa;
 }
 
-#map-searchbar .osmid {
+#poi-sidebar h4, h5 {
+    border-bottom: 1px solid #aaa;
+}
+
+#sidebar h4, #poi-sidebar h4 {
+    max-width: 90%;
+}
+
+#poi-sidebar .osmid {
     padding-top: 1em;
     font-size: 90%;
     white-space: nowrap;
 }
 
 /* Opening hours */
-#map-searchbar .ohopen {
+#poi-sidebar .ohopen {
     padding-top: 1em;
     font-size: 90%;
     color: #00ff00;
 }
 
-#map-searchbar .ohclosed {
+#poi-sidebar .ohclosed {
     padding-top: 1em;
     font-size: 90%;
     color: #ff0000;
 }
 
-#map-searchbar .ohlasthour {
+#poi-sidebar .ohlasthour {
     padding-top: 1em;
     font-size: 90%;
     color: #ffcc00;
 }
 
-#map-searchbar .oh-times {
+#poi-sidebar .oh-times {
     padding-left: 2em;
 }
 
-#map-searchbar .close {
-    margin-top: -6px;
+#sidebar, #poi-sidebar .close {
+    margin-top: -18px;
 }
-#map-searchbar #mapillary-photo {
+#poi-sidebar #mapillary-photo {
     max-width: 250px;
     margin-top: 1em;
     font-size: 80%;
     position: relative;
 }
-#map-searchbar #mapillary-photo a:after {
+#poi-sidebar #mapillary-photo a:after {
     content: "Mapillary.com - otevřené street-view";
     color: #ccc;
     position: absolute;
@@ -230,25 +438,24 @@ a:hover.as-text {
     text-shadow: 0 0 4px #000;
 }
 
-#map-searchbar #wikimedia-commons {
+#poi-sidebar #wikimedia-commons {
     max-width: 250px;
     margin-top: 1em;
     font-size: 80%;
     position: relative;
 }
-#map-searchbar #wikimedia-commons .commons_logo {
+#poi-sidebar #wikimedia-commons .commons_logo {
     margin-bottom: 5px;
     padding-right: 5px;
 }
 
-#map-searchbar #guidepost .guidepost_logo {
+#poi-sidebar #guidepost .guidepost_logo {
     margin-bottom: 5px;
     padding-right: 5px;
 }
 
 #main .container {
-    position:relative;
-    z-index: 5;
+    position:relative; z-index: 5;  /*potreba pro skryvani fadeOut/fadeIn */
     padding: 1em;
     background: rgba(255,255,255,0.9);
     padding-top: 50px;
@@ -261,7 +468,7 @@ a:hover.as-text {
     padding-top: 100px;
     display: none;
 }
-#main .container.splash:before {
+#main .container.splash:not(.layersSidebar-shown):before {
     content: url(../img/info-layer-switch.mini.svg);
     position: fixed;
     right: 10px;
@@ -287,14 +494,84 @@ a:hover.as-text {
 
     }
 
-    #main .container.splash:before {
+    #main .container.splash:not(.layersSidebar-shown):before {
         content: url(../img/info-layer-switch.svg);
-        right: 30px;
-        top: 70px;
+        right: 60px;
+        top: 80px;
     }
 }
 @media screen and (max-width: 767px) {
     .row {margin: 0;}
+}
+
+/*Layer Switch - overlay groups*/
+
+div[aria-expanded=true] .glyphicon-triangle-right {
+   display: none;
+}
+div[aria-expanded=false] .glyphicon-triangle-right {
+   display: inline  !important;
+}
+div[aria-expanded=false] .glyphicon-triangle-bottom {
+   display: none;
+}
+div[aria-expanded=true] .glyphicon-triangle-bottom {
+   display: inline !important;
+}
+
+div[group-active=true] {
+   color: #eef !important;
+   background-image: linear-gradient(to bottom,#21a2c5 0,#1b809e 100%);
+   text-shadow: 0 1px 0 #ccc;
+   border-color: #fff;
+   background-repeat: repeat-x;
+}
+
+div[group-active=true]:hover {
+   color: #fff !important;
+   background-image: linear-gradient(to bottom,#fff 0,#17718a 100%);
+   text-shadow: 0 1px 0 #ccc;
+   border-color: #23abd0;
+   background-repeat: repeat-x;
+   background-color: #1b809e;
+}
+
+.leaflet-control-layers-list input[type=checkbox]:checked + span {
+  color: #1b809e;
+  font-style: normal;
+}
+
+.leaflet-control-layers-list input[type=radio]:checked + span {
+  color: #1b809e;
+  font-style: normal;
+}
+
+/* Overlay label style */
+.lsOverlay {
+  color: #333;
+  font-style: italic;
+  font-weight: normal;
+}
+
+.ellipsis {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: text-bottom;
+}
+
+.sidebar-inner .ellipsis {
+      width: 180px;
+}
+
+.sidebar-inner .removable {
+      width: 160px;
+}
+
+@media screen and (max-width: 767px) {
+    .sidebar-inner .ellipsis {width: 150px;}
+    .sidebar-inner .removable {width: 110px;}
 }
 
 
@@ -368,7 +645,7 @@ a:hover.as-text {
     width:350px;
 }
 
-#gpc-img-upload-form input[type=file], input[type=text], select {
+#gpc-img-upload-form input[type=file], #gpc-img-upload-form input[type=text], #gpc-img-upload-form select {
     background:#eee !important;
     color:#000 !important;
     padding:5px !important;
@@ -474,6 +751,211 @@ a:hover.as-text {
 .space-2em {
   margin-left: 2em;
 }
+
+.bigger {
+  font-size: 3em;
+}
+
+.smaller {
+  font-size: 0.8em;
+}
+
+.crossed {
+    background:
+       linear-gradient(to top left,
+           rgba(255,0,0,0) 0%,
+           rgba(255,0,0,0) calc(50% - 0.8px),
+           rgba(255,0,0,1) 50%,
+           rgba(255,0,0,0) calc(50% + 0.8px),
+           rgba(255,0,0,0) 100%),
+       linear-gradient(to top right,
+           rgba(255,0,0,0) 0%,
+           rgba(255,0,0,0) calc(50% - 0.8px),
+           rgba(255,0,0,1) 50%,
+           rgba(255,0,0,0) calc(50% + 0.8px),
+           rgba(255,0,0,0) 100%);
+}
+
+.semigrey {
+    color: rgba(127,127,127,0.2);
+}
+
+
+/* PhotoDB-gui.js */
+
+#photoDB-preview {
+    margin-bottom: 10px;
+}
+
+a #photoDB-preview:hover {
+    -moz-box-shadow: 0 0 3px #337ab7;
+    -webkit-box-shadow: 0 0 3px #337ab7;
+    box-shadow: 0 0 3px #337ab7;
+}
+
+.photoDB-message {
+    margin-top: 5px;
+}
+
+#photoDB-upload-form #photo .photoDB-message {
+    margin-top: 15px;
+}
+
+#photoDB-upload-form .label-margin {
+    margin-bottom: 0px;
+    margin-top: 5px;
+}
+
+.photoDB-btn-grp {
+    margin-top: 1em;
+    border-top: rgba(0,0,0,0.2) solid 1px;
+    padding-top: 1em;
+}
+
+#photoDB-upload-form input[type=text]:focus, #photoDB-upload-form select:focus {
+    border:2px solid #337ab7 !important;
+}
+
+#photoDB-upload-form input[type=text].inputError {
+    border:2px solid #d9534f;
+}
+
+#modal-container button.close {
+    font-size: 300%;
+    margin-top: -25px;
+    margin-right: -10px;
+    color: #000;
+    opacity: 0.6;
+    font-weight: 700;
+    line-height: 1;
+}
+
+#myModal .modal {
+    text-align:center;
+    max-height: 100vh;
+}
+
+#myModal .modal-dialog {
+    display: inline-block;
+    width: auto;
+    margin: 15px auto;
+}
+
+#myModal .modal-body {
+    position:relative;
+    overflow:hidden;
+    max-height: calc(100vh - 50px);
+}
+
+/*#myModal {
+    max-height: 100vh;
+}*/
+
+#myModal #modalImg {
+    max-height: calc(100vh - 100px);
+    height: 100%;
+    width:auto;
+    min-height: 120px;
+}
+
+/* END of PhotoDB-gui.js */
+
+/* leaflet-condensed-attribution plugin*/
+.leaflet-container .leaflet-condensed-attribution {
+  margin: 10px;
+  padding: 0;
+  border-radius: 15px;
+  border: 2px solid rgba(0,0,0,.2);
+  background: rgba(255,255,255,.5);
+  vertical-align: middle;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.leaflet-condensed-attribution .attributes-body {
+  display: none;
+  padding: 0 4px 0 4px;
+  text-align: center;
+}
+
+.leaflet-condensed-attribution:hover,
+.leaflet-condensed-attribution:focus {
+  border-radius: 0px 15px 15px 0px;
+}
+
+.leaflet-condensed-attribution:hover .attributes-body,
+.leaflet-condensed-attribution:focus .attributes-body {
+  display: inline-block !important;
+}
+
+.leaflet-condensed-attribution .attributes-emblem {
+  margin: 2px;
+  font-size: 14px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+/* Always expanded and without emblem on bigger screens */
+@media (min-width: 650px) {
+  .leaflet-condensed-attribution .attributes-body {
+    display: inline-block !important;
+  }
+  .leaflet-condensed-attribution .attributes-emblem {
+    display: none;
+  }
+  .leaflet-container .leaflet-condensed-attribution {
+    border-radius: 0px;
+    border: 0px;
+  }
+}
+/* End of leaflet-condensed-attribution plugin style*/
+
+/* fileLayerPlugin */
+.gpx-marker {
+  font-size:1.5em;
+  color: rgba(255, 255, 0, 1);
+  text-shadow: 5px 5px 5px #000000;;
+}
+
+
+/* Hide elements for printing */
+@media print {
+    #poi-sidebar .osmid {
+        white-space: normal;
+    }
+    .leaflet-control-container .leaflet-top {
+        display: none;
+    }
+    div[group-active=true] {
+        color: #fff !important;
+        background-image: linear-gradient(to bottom,#21a2c5 0,#1b809e 100%) !important;
+        border-color: #000 !important;
+    }
+    .leaflet-control-scale {
+        background: #fff !important;
+    }
+    .leaflet-control-coordinates .leaflet-control,
+    .leaflet-control-coordinates-gps,
+    .leaflet-control-coordinates-lat,
+    .leaflet-control-coordinates-lng,
+    .leaflet-control-coordinates-icon {
+        display: none;
+    }
+    .leaflet-container .leaflet-control-attribution {
+        background: #fff !important;
+        margin-left: 150px !important;
+        width: calc(100% - 150px);
+    }
+}
+/* End of print @media print */
 
 
 /* Primárně pro účely splashe */
