@@ -50,6 +50,7 @@ class Admin_PagesPresenter extends Admin_BasePresenter
 		$newid = PagesModel::addPage(array(
 				'id_parent' => $id_parent,
 				'lang' => $this->lang,
+                'text' => '',
 			));
 		$this->redirect('edit#newpage', $newid);
 	}

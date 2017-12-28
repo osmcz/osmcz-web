@@ -25,6 +25,33 @@
 class Helpers
 {
 
+    public static function talkMailBody($s)
+    {
+        $s = htmlspecialchars($s);
+        //$s = preg_replace('~==([^=]+)==[\r\n]+~is', '<h2>\\1</h2>', $s);
+        //$s = preg_replace('~\*([^*]+)\*~iU', '<b>\\1</b>', $s);
+        $opened = false;
+        $out = [];
+        foreach(explode("\n", $s) as $line) {
+            $isQuote = preg_match("~^(\s*&gt;\s*){1,}~", $line);
+            if (!$opened && $isQuote) {
+                $opened = true;
+                $out[] = "<a href='#' onclick='$(this).next().toggle();return false;'>[&hellip;]</a>\n<div class='quoted'>" . $line;
+            }
+            else if ($opened && !$isQuote) {
+                $out[] = "</div>" . $line;
+                $opened = false;
+            }
+            else
+                $out[] = $line;
+        }
+        if ($opened) $out[] = "</div>";
+        $s = implode("\n", $out);
+
+        return preg_replace('~(https?://)([^ \n\r\t()<>[\]]+)~is', '<a href="\\1\\2" target="_blank" rel="nofollow">\\1\\2</a>', $s);
+    }
+
+
 	/**
 	 * Czech helper time ago in words.
 	 * @param  int

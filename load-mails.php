@@ -1,7 +1,7 @@
 <?php
 
 define("DONT_RUN_NPRESS_APP", true);
-require_once "index.php";
+require_once "index.php"; //db connection
 error_reporting(0);
 
 if(!function_exists('gzdecode')){

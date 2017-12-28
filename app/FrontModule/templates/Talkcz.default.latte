@@ -1,0 +1,55 @@
+{block title}Archiv konference talk-cz{/block}
+
+{block map}{include #osmczmap}{/block}
+
+{block content}
+
+<div id="main">
+    <div class="container" n:snippet="content">
+        <h1>{include #title}</h1>
+
+        <p>
+            Jak přispívat, blbalbalba
+            <br>
+            SEARCHBOX
+
+        </p>
+
+        <hr>
+
+        <div class="pull-right">
+            <a n:href="this $prev->format(Ym)">&laquo; Předchozí měsíc</a>
+            <select onchange="location.href = this.value">
+                {foreach $monthList as $m}
+                <option value="{link default $m->ym}" n:attr="selected => ($m->ym == $month->format(Ym))">
+                    {$m->date|date:n|czechMonth} {$m->date|date:Y} ({$m->count})
+                </option>
+                {/foreach}
+            </select>
+            <a n:href="this $next->format(Ym)">Další měsíc &raquo;</a>
+        </div>
+        <h2>{$month|date:n|czechMonth} {$month|date:Y}</h2>
+
+        {if !count($result)}
+        <div class="alert alert-warning">V tomto měsíci nebyla nalezena žádná konferenční vlákna.</div>
+        {/if}
+
+        <table class="table">
+            {foreach $result as $r}
+                <tr id="c{$r->conversationid}">
+                    <td class="img"><img src="{$r->opener_mail|gravatar}" alt="gravatar {$r->opener}" width="32" height="32">
+                    <td class="subject"><a n:href="conversation $r->conversationid">{$r->subject|truncate:50}</a>
+                        <br>od {$r->opener} ~ zpráv: {$r->count}
+                    <td class="date" title="{$r->opened|date:'j.n. H:i'}">{$r->opened|timeago}
+            {/foreach}
+        </table>
+
+        <hr>
+
+        <p>Tento mirror je obnovován každých 5 minut.</p>
+        <p>Archiv na mailserveru: <a href="http://lists.openstreetmap.org/pipermail/talk-cz">lists.openstreetmap.org/pipermail/talk-cz</a></p>
+
+
+
+    </div>
+</div>

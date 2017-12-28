@@ -1133,3 +1133,25 @@ a #photoDB-preview:hover {
         overflow-y : auto;
     }
 }
+
+.mailarchive .header .date {float:right;}
+.mailarchive .header .avatar {float:left; margin-right: .4em;}
+.mailarchive .header h3 {font-size: 16px; display: inline; padding: 0 .3em 0 3px;}
+.mailarchive .stat {
+    color: #aaa;
+    font-size: 80%;
+    padding-left: .4em;
+}
+.mailarchive .stat .glyphicon {
+    color: #bbb;
+    margin-right: 2px;
+}
+.mailarchive .body {
+    clear: left;
+    white-space: pre-wrap;
+    font-family:monospace
+}
+.mailarchive .quoted {
+    background: #eee;
+    display: none;
+}
