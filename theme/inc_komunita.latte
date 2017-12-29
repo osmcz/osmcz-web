@@ -1,15 +1,20 @@
-{if $is_project_page}
-    {var $query = dibi::query("SELECT users.*, count(mailarchive.from) talk_cz_mails
-                        FROM users LEFT JOIN mailarchive ON `from` = email
-                        WHERE email != '' AND public = 1 AND projects LIKE '%($page->id)%'
-                        GROUP BY email
-                        ORDER BY fullname")}
+{if isset($author_list)}
+    {var $query = $author_list}
+    {var $is_project_page = true}
 {else}
-    {var $query = dibi::query("SELECT users.*, count(mailarchive.from) talk_cz_mails
-                        FROM users LEFT JOIN mailarchive ON `from` = email
-                        WHERE email != '' AND public = 1
-                        GROUP BY email
-                        ORDER BY fullname")}
+    {if $is_project_page}
+        {var $query = dibi::query("SELECT users.*, count(mailarchive.from) talk_cz_mails
+                            FROM users LEFT JOIN mailarchive ON `from` = email
+                            WHERE email != '' AND public = 1 AND projects LIKE '%($page->id)%'
+                            GROUP BY email
+                            ORDER BY fullname")}
+    {else}
+        {var $query = dibi::query("SELECT users.*, count(mailarchive.from) talk_cz_mails
+                            FROM users LEFT JOIN mailarchive ON `from` = email
+                            WHERE email != '' AND public = 1
+                            GROUP BY email
+                            ORDER BY fullname")}
+    {/if}
 {/if}
 
 <div class="row komunita">
