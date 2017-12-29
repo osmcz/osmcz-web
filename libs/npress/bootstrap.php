@@ -75,7 +75,7 @@ $frontRouter[] = new Route('<presenter>[/<action>]/<id_page>', array( //default 
         'presenter' => 'Pages',
         'action' => 'default',
         'id_page' => 1, //TODO default page from config (but matched only when '/' page missing)
-    ));
+    ), isset($_SERVER['HTTPS']) ? Route::SECURED : false);
 
 
 // Include app specific bootstrap.php

@@ -40,16 +40,14 @@
                     <div>
                         <img src="/theme/img/logo-osm.svg" width="16" alt="">
                         <a href="http://www.openstreetmap.org/user/{$r->username}">{$r->username}</a>
-                        <span class="stat"
+                        <a href="http://yosmhm.neis-one.org/?{$r->username}" class="stat"
                               title="Počet changesetů na osm.org (účet vytvořen {$r->account_created|date:'j.n.Y'})">
-                            <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
-                            {$r->changesets}
-                        </span>
+                            <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>{$r->changesets}
+                        </a>
 
-                        <span class="stat" title="Počet příspěvků v konferenci talk-cz">
-                            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                            {$r->talk_cz_mails}
-                        </span>
+                        <a n:href="talkcz:author $template->talkstub($r->email)" class="stat" title="Počet příspěvků v konferenci talk-cz">
+                            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>{$r->talk_cz_mails}
+                        </a>
                     </div>
                     <div n:if="false && $r->about_me">{$r->about_me}</div>
                     <div class="tags">

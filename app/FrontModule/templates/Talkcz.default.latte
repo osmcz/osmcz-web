@@ -2,51 +2,56 @@
 {block map}{include #osmczmap}{/block}
 
 {block content}
+<div class="container" n:snippet="content">
+    <h1>{include #title}</h1>
 
-<div id="main">
-    <div class="container" n:snippet="content">
-        <h1>{include #title}</h1>
+    <p><b>Přispěvek</b> můžete poslat na:</p>
+    <blockquote><p><b><a href="mailto:talk-cz@openstreetmap.org">talk-cz@openstreetmap.org</a></b></p></blockquote>
+    <p><i>!! Poslat zprávu je možné bez registrace (moderátor ji schválí). Ovšem odpovědi je nutné sledovat
+            zde ve webovém archivu či si
+            (dočasně)&nbsp;<a href="https://lists.openstreetmap.org/listinfo/talk-cz">přihlásit odběr všech zpráv</a>.</i></p>
+    <p>Níže jsou zobrazena celá diskuzní vlákna (tak jak to bývá zvykem na fórech).</p>
 
-        <p><b>Přispěvek</b> můžete poslat na:</p>
-        <blockquote><p><b><a href="mailto:talk-cz@openstreetmap.org">talk-cz@openstreetmap.org</a></b></p></blockquote>
-        <p><i>!! Poslat zprávu je možné bez registrace (moderátor ji schválí). Ovšem odpovědi je nutné sledovat
-                zde ve webovém archivu či si
-                (dočasně)&nbsp;<a href="https://lists.openstreetmap.org/listinfo/talk-cz">přihlásit odběr všech zpráv</a>.</i></p>
-        <hr>
-
-        <div class="pull-right">
-            <a n:href="this $prev->format(Ym)">&laquo; Předchozí měsíc</a>
-            <select onchange="location.href = this.value">
-                {foreach $monthList as $m}
-                <option value="{link default $m->ym}" n:attr="selected => ($m->ym == $month->format(Ym))">
-                    {$m->date|date:n|czechMonth} {$m->date|date:Y} ({$m->count})
-                </option>
-                {/foreach}
-            </select>
-            <a n:href="this $next->format(Ym)">Další měsíc &raquo;</a>
-        </div>
-        <h2>{$month|date:n|czechMonth} {$month|date:Y}</h2>
-
-        {if !count($result)}
-        <div class="alert alert-warning">V tomto měsíci nebyla nalezena žádná konferenční vlákna.</div>
-        {/if}
-
-        <table class="table">
-            {foreach $result as $r}
-                <tr id="c{$r->conversationid}">
-                    <td class="img"><img src="{$r->opener_mail|gravatar}" alt="gravatar {$r->opener}" width="32" height="32">
-                    <td class="subject"><a n:href="conversation $r->conversationid">{$r->subject|truncate:50}</a>
-                        <br>od {$r->opener} ~ zpráv: {$r->count}
-                    <td class="date" title="{$r->opened|date:'j.n. H:i'}">{$r->opened|timeago}
+    {block monthControls}
+    <div class="pull-right">
+        <a class="ajax" n:href="this $prev->format(Ym)">&laquo; Předchozí měsíc</a>
+        <select onchange="jQuery.nette.callUrl(this)">
+            {foreach $monthList as $m}
+            <option value="{link default $m->ym}" n:attr="selected => ($m->ym == $month->format(Ym))">
+                {$m->date|date:n|czechMonth} {$m->date|date:Y} ({$m->count})
+            </option>
             {/foreach}
-        </table>
-
-        <hr>
-
-        <p>Tento mirror je obnovován každých 5 minut.</p>
-        <p>Archiv na mailserveru: <a href="http://lists.openstreetmap.org/pipermail/talk-cz">lists.openstreetmap.org/pipermail/talk-cz</a></p>
-
-
-
+        </select>
+        <a class="ajax" n:href="this $next->format(Ym)">Další měsíc &raquo;</a>
     </div>
+    {/block}
+    <h2>{$month|date:n|czechMonth} {$month|date:Y}</h2>
+
+    {if !count($result)}
+    <div class="alert alert-warning">V tomto měsíci nebyla nalezena žádná konferenční vlákna.</div>
+    {/if}
+
+    <table class="table">
+        <colgroup><col width="44"><col><col width="100"></colgroup>
+        {foreach $result as $r}
+            <tr id="c{$r->conversationid}">
+                <td class="img">
+                    <a class="ajax" n:href="conversation $r->conversationid"><img src="{$r->opener_mail|gravatar}" alt="gravatar {$r->opener}" width="32" height="32"></a>
+                <td class="subject">
+                    <a class="ajax" n:href="conversation $r->conversationid">{$r->subject?:'N/A'|truncate:200}</a>  ({$r->count})
+                    <br>od <i>{$r->opener}</i>
+                <td class="date" title="Poslední zpráva z {$r->last_date|date:'j.n. H:i:s'}">{$r->last_date|timeago:'j.n.Y H:i'}
+        {/foreach}
+    </table>
+
+    <hr>
+    {include #monthControls}
+
+
+    <p>Tento mirror je obnovován každých 5 minut.</p>
+    <p>Archiv na mailserveru: <a href="http://lists.openstreetmap.org/pipermail/talk-cz">lists.openstreetmap.org/pipermail/talk-cz</a></p>
+
+
+
+
 </div>

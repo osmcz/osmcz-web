@@ -48,7 +48,7 @@ class Helpers
         if ($opened) $out[] = "</div>";
         $s = implode("\n", $out);
 
-        return preg_replace('~(https?://)([^ \n\r\t()<>[\]]+)~is', '<a href="\\1\\2" target="_blank" rel="nofollow">\\1\\2</a>', $s);
+        return preg_replace('~(https?://)([^ \n\r\t()<\>[\]]+)~is', '<a href="\\1\\2" target="_blank" rel="nofollow">\\1\\2</a>', $s);
     }
 
 
@@ -57,7 +57,7 @@ class Helpers
 	 * @param  int
 	 * @return string
 	 */
-	public static function timeAgoInWords($time)
+	public static function timeAgoInWords($time, $format, $formatAfterDays)
 	{
 		if (!$time) {
 			return FALSE;
@@ -70,6 +70,10 @@ class Helpers
 		}
 
 		$delta = time() - $time;
+
+        if ($format AND $delta > $formatAfterDays*60*60*24) {
+            return date($format, $time);
+        }
 
 		if ($delta < 0) {
 			$delta = round(abs($delta) / 60);

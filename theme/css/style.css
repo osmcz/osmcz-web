@@ -1123,6 +1123,7 @@ a #photoDB-preview:hover {
 }
 .komunita .stat .glyphicon {
     color: #eee;
+    margin-right: 5px;
 }
 @media (min-width: 768px) {
     .komunita .thumbnail .caption {
@@ -1144,7 +1145,7 @@ a #photoDB-preview:hover {
 }
 .mailarchive .stat .glyphicon {
     color: #bbb;
-    margin-right: 2px;
+    margin-right: 5px;
 }
 .mailarchive .body {
     clear: left;

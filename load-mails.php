@@ -1,5 +1,7 @@
 <?php
 
+// WARNING: needs extension=php_imap.dll .. otherwise UTF encoded strings are wrong
+
 define("DONT_RUN_NPRESS_APP", true);
 require_once "index.php"; //db connection
 error_reporting(0);
@@ -10,8 +12,9 @@ if(!function_exists('gzdecode')){
   }
 }
 
-// get current mbox archive
-$url = "https://lists.openstreetmap.org/pipermail/talk-cz/" . date('Y-F') . ".txt";
+/*/ get current mbox archive
+//$url = "https://lists.openstreetmap.org/pipermail/talk-cz/" .
+$url =     date('Y-F') . ".txt";
 $mbox = file_get_contents($url);
 if (!$mbox) {
     $url .= ".gz";
@@ -22,6 +25,7 @@ dibi::query('DELETE FROM mailarchive WHERE YEAR(`date`) = %i', date('Y'), ' AND 
 insertMailsFromMbox($mbox);
 
 /*/
+set_time_limit(10*60);
 
 // fetch all from 2007-1 til now
 for ($y = 2007; $y <= date('Y'); $y++) {
@@ -40,7 +44,7 @@ for ($y = 2007; $y <= date('Y'); $y++) {
             break;
     }
 }
-*/
+//*/
 
 
 /**
@@ -54,8 +58,11 @@ function insertMailsFromMbox($mbox)
     }
 
     foreach (preg_split('/\nFrom .+?\n/', $mbox) as $r) {
-
         $e = new PlancakeEmailParser($r);
+        if(dibi::fetch("SELECT 1 FROM mailarchive WHERE msgid = %s", $e->getHeader('message-id'))) {
+            echo "msgid exists skipping<br>";
+            continue;
+        }
 
         $from = $e->getFieldDecoded('from');
         $name = "";
@@ -67,6 +74,21 @@ function insertMailsFromMbox($mbox)
         $subject = $e->getSubject();
         $subject = preg_replace('/^\[Talk-cz\] */', '', $subject);
 
+        // find conversation
+        $cid = dibi::fetchSingle("
+          SELECT conversationid 
+          FROM mailarchive 
+          WHERE msgid = %s",$e->getHeader('in-reply-to'), "
+            OR BINARY subject = %s", $subject);
+
+        if (!$cid) $cid = dibi::fetchSingle("SELECT max(conversationid)+1 FROM mailarchive");
+        if (!$cid) $cid = 1;
+
+        if ($from == "=?UTF-8?Q?Petr_Mor=c3=a1vek_ (=?UTF-8?Q?Petr_Mor=c3=a1vek_)") {  // mailman broken
+            $name = "Petr Morávek [Xificurk]";
+            $from = "petr@pada.cz";
+        }
+
         dibi::query("INSERT INTO mailarchive", array(
             "msgid" => $e->getHeader('message-id'),
             "replyid" => $e->getHeader('in-reply-to'),
@@ -75,8 +97,8 @@ function insertMailsFromMbox($mbox)
             "name" => $name,
             "subject" => $subject,
             "text" => $e->getPlainBody(),
+            "conversationid" => $cid,
         ));
         echo ".";
-
     }
 }

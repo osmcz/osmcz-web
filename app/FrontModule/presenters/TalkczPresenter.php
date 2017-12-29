@@ -16,6 +16,11 @@ class Front_TalkczPresenter extends Front_BasePresenter
                 ) conversationsView
                 GROUP BY YEAR(last_date), MONTH(last_date)
                 ORDER BY last_date DESC");
+
+        if ($this->isAjax()) {
+            $this->invalidateControl('content');
+            $this->payload->uri = $this->context->httpRequest->getUrl()->getRelativeUrl();
+        }
     }
 
 
@@ -27,18 +32,30 @@ class Front_TalkczPresenter extends Front_BasePresenter
         }
 
         $this->template->result = dibi::query("
-                    SELECT conversationid, 
-                      max(`date`) AS last_date, 
-                      `date` AS opened, 
-                      `name` AS opener, `from` AS opener_mail, `subject`, 
+                    SELECT m.conversationid, m.date last_date, m.subject, 
+                          (SELECT count(1) FROM mailarchive mc WHERE mc.conversationid = m.conversationid) count,
+                          (SELECT name FROM mailarchive oldest WHERE oldest.conversationid = m.conversationid ORDER BY date ASC LIMIT 1) opener,
+                          (SELECT `from` FROM mailarchive oldest2 WHERE oldest2.conversationid = m.conversationid ORDER BY date ASC LIMIT 1) opener_mail
+                    FROM mailarchive m
+                    LEFT JOIN mailarchive newest ON (m.conversationid = newest.conversationid AND m.date < newest.date)
+                    WHERE newest.conversationid IS NULL  -- this works like a GROUP BY
+                        AND m.conversationid >0
+                        AND YEAR(m.date) = %i", $matches[1]," AND MONTH(m.date) = %i", $matches[2],"
+                    ORDER BY m.date DESC
+                ");
+
+        /*  10 times worse performance (0.4s versus 0.07s):
+                   SELECT conversationid,
+                      max(`date`) AS last_date,
+                      `date` AS opened, -- wrong!!
+                      `name` AS opener, `from` AS opener_mail, `subject`,
                       count(1) AS count
                     FROM `mailarchive`
                     WHERE conversationid > 0
                     GROUP BY conversationid
-                    HAVING YEAR(last_date) = %i", $matches[1]," AND MONTH(last_date) = %i", $matches[2]," 
+                    HAVING YEAR(last_date) = 2017 AND MONTH(last_date) = 12
                     ORDER BY last_date DESC
-                ");
-
+        */
         $month = new DateTime53();
         $month->setDate($matches[1], $matches[2], 1);
         $this->template->month = $month;
@@ -101,66 +118,4 @@ class Front_TalkczPresenter extends Front_BasePresenter
         $this->template->mailList = $mailList;
         $this->template->themeDir = $this->context->params["themeDir"];
     }
-
-    public function actionMakeConversation()
-    {
-        /*
-        // run once to fill all "opening posts"
-        dibi::query("
-            SELECT @pv:=0;
-            UPDATE mailarchive m
-                SET conversationid = (@pv:=@pv+1)
-                WHERE replyid = ''
-                ORDER BY date ASC;
-           ");
-        */
-
-        // add index
-
-        // deduplicate msgid
-
-
-        // assign to conversation based on "msgid == replyid"
-        echo dibi::fetchSingle("SELECT count(1) FROM mailarchive WHERE conversationid = 0");
-        echo "<hr>";
-
-        $i = 0;
-        while (true) {
-            $updateOneDepth = dibi::query("
-                SELECT mreply.msgid, morig.conversationid
-                FROM mailarchive mreply 
-                LEFT JOIN mailarchive morig ON mreply.replyid = morig.msgid
-                WHERE mreply.conversationid = 0
-                AND morig.conversationid > 0
-            ");
-
-            if (count($updateOneDepth) == 0)
-                break;
-
-            $i = 0;
-            foreach ($updateOneDepth as $r) {
-                dibi::query("UPDATE mailarchive SET conversationid = %i", $r->conversationid, " WHERE msgid = %s", $r->msgid);
-
-                if ($i % 10 == 0) {
-                    echo ".";
-                    flush();
-                }
-            }
-
-            $i++;
-        }
-
-        echo "<hr>";
-        echo "depth: $i, rest: " . dibi::fetchSingle("SELECT count(1) FROM mailarchive WHERE conversationid = 0");
-        echo "<hr>";
-
-        // assign to conversation unmatched "replyid"  --- try to match by subject and date, or  "create new conversation from it"
-
-
-        $this->terminate();
-    }
 }
-
-
-
-

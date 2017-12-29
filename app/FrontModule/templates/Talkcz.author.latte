@@ -2,40 +2,39 @@
 {block map}{include #osmczmap}{/block}
 
 {block content}
-<div id="main">
-    <div class="container mailarchive" n:snippet="content">
-        <div class="pull-right margin-top-10">
-            <select onchange="location.href = this.value">
-                <option>-- měsíc --</option>
-                {foreach $monthList as $m}
-                    <option value="{link default $m->ym}">
-                        {$m->date|date:n|czechMonth} {$m->date|date:Y} ({$m->count})
-                    </option>
-                {/foreach}
-            </select>
-        </div>
-        <h2>{include #title}</h2>
-
-        {if isset($author->username)}
-            <p style="margin-bottom:-18px">Profil OSMCZ:</p>
-            {include $themeDir."/inc_komunita.latte", is_wide => true, author_list => [$author]}
-        {else}
-            <p style="text-align:right"><i>Pozn.: Profil OSMCZ nebyl založen, možnost je dole na stránce <a href="/komunita">komunita</a></i></p>
-        {/if}
-
-        <hr>
-        <p>Počet příspěvků: <b>{count($mailList)}</b> </p>
-
-
-        <ul>
-        {foreach $mailList as $m}
-            {var $mid = substr(md5($m->msgid),-6)}
-            <li>{$m->date|date:'j.n.Y'}: <a n:href="conversation#m$mid $m->conversationid">{$m->subject}</a>
-        {/foreach}
-        </ul>
-
-        <hr>
-        <a n:href="default" class="pull-right">&laquo; zpět na archiv</a>
-
+<div class="container mailarchive" n:snippet="content">
+    <div class="pull-right margin-top-10">
+        <a class="ajax" n:href="default">&laquo; zpět na archiv</a> |
+        <select onchange="jQuery.nette.callUrl(this)">
+            <option>-- měsíc --</option>
+            {foreach $monthList as $m}
+                <option value="{link default $m->ym}">
+                    {$m->date|date:n|czechMonth} {$m->date|date:Y} ({$m->count})
+                </option>
+            {/foreach}
+        </select>
     </div>
+    <h2>{include #title}</h2>
+
+    {if isset($author->username)}
+        <p style="margin-bottom:-18px">Profil OSMCZ:</p>
+        {include $themeDir."/inc_komunita.latte", is_wide => true, author_list => [$author]}
+    {else}
+        <p style="text-align:right"><i>Pozn.: Profil OSMCZ nebyl založen, možnost je dole na stránce <a href="/komunita">komunita</a></i></p>
+    {/if}
+
+    <hr>
+    <p>Počet příspěvků: <b>{count($mailList)}</b> </p>
+
+
+    <ul>
+    {foreach $mailList as $m}
+        {var $mid = substr(md5($m->msgid),-6)}
+        <li>{$m->date|date:'j.n.Y'}:  <a class="ajax" n:href="conversation#m$mid $m->conversationid">{$m->subject}</a>
+    {/foreach}
+    </ul>
+
+    <hr>
+     <a class="ajax pull-right" n:href="default">&laquo; zpět na archiv</a>
+
 </div>

@@ -25,3 +25,9 @@ done
 cd $WORK_TREE
 rm -r "$WORK_TREE/app/temp/cache"
 # mysql -u dbuser --password=pass dbname < database.sql
+
+
+----------------
+git subtree pull --prefix theme/ git@github.com:osmcz/osmcz.git master && git push --force devosm master 
+
+pause

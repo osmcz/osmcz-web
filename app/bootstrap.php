@@ -1,7 +1,7 @@
 <?php
 
-FileTemplate::extensionMethod('timeago', function ($that, $s) {
-    return Helpers::timeAgoInWords($s);
+FileTemplate::extensionMethod('timeago', function ($that, $s, $format = false, $formatAfterDays = 15) {
+    return Helpers::timeAgoInWords($s, $format, $formatAfterDays);
 });
 
 FileTemplate::extensionMethod('modified', function ($that, $s) {
@@ -21,7 +21,9 @@ FileTemplate::extensionMethod('gravatar', function ($that, $mail) {
    return "https://www.gravatar.com/avatar/" . md5(strtolower($mail)) . "?s=32&d=mm";
 });
 
-
+FileTemplate::extensionMethod('talkstub', function ($that, $mail) {
+    return strstr($mail, '@', true) . "-" . substr(md5($mail), -5);
+});
 
 
 Route::$defaultFlags = Route::SECURED;
