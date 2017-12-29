@@ -27,6 +27,8 @@ class Helpers
 
     public static function talkMailBody($s)
     {
+        $startQuoteHtml = "<a href='#' onclick='$(this).next().toggle();return false;'>[&hellip;]</a>\n<div class='quoted'>";
+
         $s = htmlspecialchars($s);
         //$s = preg_replace('~==([^=]+)==[\r\n]+~is', '<h2>\\1</h2>', $s);
         //$s = preg_replace('~\*([^*]+)\*~iU', '<b>\\1</b>', $s);
@@ -36,7 +38,7 @@ class Helpers
             $isQuote = preg_match("~^(\s*&gt;\s*){1,}~", $line);
             if (!$opened && $isQuote) {
                 $opened = true;
-                $out[] = "<a href='#' onclick='$(this).next().toggle();return false;'>[&hellip;]</a>\n<div class='quoted'>" . $line;
+                $out[] = $startQuoteHtml . $line;
             }
             else if ($opened && !$isQuote) {
                 $out[] = "</div>" . $line;
@@ -46,6 +48,29 @@ class Helpers
                 $out[] = $line;
         }
         if ($opened) $out[] = "</div>";
+
+        //---------- Původní zpráva ----------
+        //Od: ..
+        //Komu: ..
+        //Datum: ..
+        $opened = false;
+        for ($i = 0; $i < count($out); $i++) {
+            $line = $out[$i];
+            if (!$opened AND preg_match("/^\s*[-~_]{5,}.*[-~_]{5,}\s*$/", $line)) {
+                $opened = $i;
+                echo $line;
+                continue;
+            }
+            if (abs($opened-$i) < 3 AND !preg_match("/^\s*[a-zA-Z]+: /", $line)) {
+                $opened = false;
+                continue;
+            }
+        }
+        if ($opened) {
+            $out[$opened] = "<div style='border-left:1px silver solid;padding-left:5px'>" . $out[$opened];
+            $out[count($out)-1] .= "</div>";
+        }
+
         $s = implode("\n", $out);
 
         return preg_replace('~(https?://)([^ \n\r\t()<\>[\]]+)~is', '<a href="\\1\\2" target="_blank" rel="nofollow">\\1\\2</a>', $s);

@@ -31,10 +31,8 @@ jQuery.extend({
                 return;
             }
 
-            // history api
-            if (payload.uri) {
-                history.pushState({}, document.title, "/" + payload.uri);
-                window.scrollTo(0,0);
+            if (payload.title) {
+                document.title = payload.title;
             }
 
             // snippets
@@ -43,6 +41,17 @@ jQuery.extend({
                     jQuery.nette.updateSnippet(i, payload.snippets[i]);
                 }
             }
+
+            // history api
+            if (payload.uri) {
+                history.pushState({}, document.title, "/" + payload.uri);
+                window.scrollTo(0,0);
+                if (this.url && this.url.match(/#(.+)$/)) {
+                    var id = /#(.+)$/.exec(this.url)[0];
+                    $('html, body').animate({scrollTop: $(id).offset().top}, 200);
+                }
+            }
+
         },
 
         callUrl: function (obj) {
@@ -57,7 +66,7 @@ jQuery.extend({
                 url: obj.href || obj.value,
                 type: 'get',
                 dataType: "json",
-                success: jQuery.nette.success
+                success: jQuery.nette.success.bind({url: obj.href || obj.value})
             });
         }
     }

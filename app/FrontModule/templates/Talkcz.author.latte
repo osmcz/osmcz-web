@@ -1,4 +1,4 @@
-{block title}[Talk-cz] {$author->name}{/block}
+{block title}[Talk-cz] {$author->name ?: 'Profil autora'}{/block}
 {block map}{include #osmczmap}{/block}
 
 {block content}
@@ -14,13 +14,19 @@
             {/foreach}
         </select>
     </div>
-    <h2>{include #title}</h2>
+    <h2>[Talk-cz] Profil autora</h2>
 
     {if isset($author->username)}
         <p style="margin-bottom:-18px">Profil OSMCZ:</p>
         {include $themeDir."/inc_komunita.latte", is_wide => true, author_list => [$author]}
     {else}
-        <p style="text-align:right"><i>Pozn.: Profil OSMCZ nebyl založen, možnost je dole na stránce <a href="/komunita">komunita</a></i></p>
+        <div class="pull-right"><i>Pozn.: Profil OSMCZ nebyl založen, možnost je dole na stránce <a href="/komunita">komunita</a>
+                <br>Ikona vlevo je ze služby gravatar.com pro příslušnou emailovou adresu.
+            </i></div>
+        <div><img src="{$author->from|gravatar}" alt="gravatar" width="32" height="32">
+            <a>{$author->name ?: 'N/A'}</a>
+            &lt;{$author->from|replace:"@":" at "}&gt;
+        </div>
     {/if}
 
     <hr>

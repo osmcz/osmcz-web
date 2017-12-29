@@ -20,9 +20,10 @@
     {foreach $result as $r}
         <hr>
         {var $mid = substr(md5($r->msgid),-6)}
-        <div id="m{$mid}">
+        <div id="m{$mid}" class="jumptarget">
             <div class="header">
-                <div class="date" title="msgid: {$r->msgid}">
+                <div class="date" title="{$r->subject}
+msgid: {$r->msgid}">
                     <b>{$r->date|date:'j.n.Y h:i:s'}</b> (<a href="#m{$mid}">#{$iterations+1}</a>)
                 </div>
                 <img src="{$r->img ? $r->img : $template->gravatar($r->from)}" alt="gravatar" width="32" height="32" class="avatar">
