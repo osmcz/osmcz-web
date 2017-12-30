@@ -1156,6 +1156,11 @@ a #photoDB-preview:hover {
     background: #eee;
     display: none;
 }
+.mailarchive.search h2 {margin: 2em 0 1em 0; font-size: 22px;}
+.mailarchive.search .body {white-space: normal;}
+.mailarchive.search .body a {color: #000;}
+.mailarchive.search .body a:hover {text-decoration: none; background: #ffff66}
+
 
 .jumptarget::before {
     content:"";
@@ -1163,3 +1168,8 @@ a #photoDB-preview:hover {
     height:60px; /* fixed header height*/
     margin:-60px 0 0; /* negative fixed header height */
 }
+.highlight {
+    background: #ffff66;
+    color: #000;
+}
+

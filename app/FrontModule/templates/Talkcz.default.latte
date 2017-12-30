@@ -3,6 +3,15 @@
 
 {block content}
 <div class="container" n:snippet="content">
+    <form action="{link search}" role="search" class="pull-right margin-top-10" style="width: 200px">
+        <div class="input-group">
+            <input type="text" name="query" class="form-control" placeholder="Search for...">
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+            </span>
+        </div><!-- /input-group -->
+    </form>
+
     <h1>{include #title}</h1>
 
     <p><b>Přispěvek</b> můžete poslat na:</p>

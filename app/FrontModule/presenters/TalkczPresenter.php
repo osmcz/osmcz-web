@@ -118,4 +118,20 @@ class Front_TalkczPresenter extends Front_BasePresenter
         $this->template->mailList = $mailList;
         $this->template->themeDir = $this->context->params["themeDir"];
     }
+
+    public function actionSearch($query = 'osmcz')
+    {
+        $result = dibi::query("
+            SELECT m.*, u.*, m1.talk_cz_mails
+                FROM `mailarchive` m
+                LEFT JOIN users u ON m.`from` = u.email 
+                LEFT JOIN (SELECT count(msgid) talk_cz_mails, `from` FROM mailarchive GROUP BY `from`) m1 ON m.from = m1.from
+		    WHERE MATCH(text) AGAINST (%s",$query," IN BOOLEAN MODE)
+		    ORDER BY date DESC, MATCH(text) AGAINST (%s",$query,") DESC
+	    ");
+
+        $this->template->results = $result->fetchAssoc('conversationid,#');
+        $this->template->query = $query;
+    }
+
 }

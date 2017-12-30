@@ -15,15 +15,33 @@
 
 
 
-/**
- * My helpers collection.
- *
- * @author     David Grudl
- * @copyright  Copyright (c) 2008, 2009 David Grudl
- * @package    Nette Extras
- */
+
 class Helpers
 {
+
+    // taken from: https://github.com/zbycz/casopisy/blob/dbd091/app/model/Obsah.php#L153
+    public static function excerpt($text, $query)
+    {
+        //words
+        $words = join('|', explode(' ', preg_quote($query)));
+
+        //lookahead/behind assertions ensures cut between words
+        $s = '\s\x00-/:-@\[-`{-~'; //character set for start/end of words
+        $matches = Strings::matchAll($text, '#(?<=['.$s.']).{1,30}(('.$words.').{1,30})+(?=['.$s.'])#uis');
+
+        //delimiter between occurences
+        $results = array();
+        foreach($matches as $line) {
+            $results[] = htmlspecialchars($line[0], 0, 'UTF-8');
+        }
+        $result = join(' <b>(...)</b> ', $results);
+
+        //highlight
+        $result = Strings::replace($result, '#'.$words.'#iu', "<span class=\"highlight\">\$0</span>");
+        return $result;
+    }
+
+
 
     public static function talkMailBody($s)
     {
