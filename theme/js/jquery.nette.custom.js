@@ -31,10 +31,6 @@ jQuery.extend({
                 return;
             }
 
-            if (payload.title) {
-                document.title = payload.title;
-            }
-
             // snippets
             if (payload.snippets) {
                 for (var i in payload.snippets) {
@@ -44,7 +40,7 @@ jQuery.extend({
 
             // history api
             if (payload.uri) {
-                history.pushState({}, document.title, "/" + payload.uri);
+                history.pushState({nette: true}, document.title, "/" + payload.uri);
                 window.scrollTo(0,0);
                 if (this.url && this.url.match(/#(.+)$/)) {
                     var id = /#(.+)$/.exec(this.url)[0];
@@ -72,6 +68,8 @@ jQuery.extend({
     }
 });
 
+// TODO popstate ??
+// window.onpopstate = function(a) { window.location.reload(); };
 
 $("#main").on("click", "a.ajax", function (event) {
     if (!event.ctrlKey) {

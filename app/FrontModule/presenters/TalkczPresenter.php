@@ -19,6 +19,7 @@ class Front_TalkczPresenter extends Front_BasePresenter
 
         if ($this->isAjax()) {
             $this->invalidateControl('content');
+            $this->invalidateControl('title');
             $this->payload->uri = $this->context->httpRequest->getUrl()->getRelativeUrl();
         }
     }
@@ -119,7 +120,7 @@ class Front_TalkczPresenter extends Front_BasePresenter
         $this->template->themeDir = $this->context->params["themeDir"];
     }
 
-    public function actionSearch($query = 'osmcz')
+    public function actionSearch($query)
     {
         $result = dibi::query("
             SELECT m.*, u.*, m1.talk_cz_mails

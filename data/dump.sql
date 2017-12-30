@@ -17,7 +17,8 @@ CREATE TABLE `mailarchive` (
   `conversationid` int(11) NOT NULL,
   PRIMARY KEY (`msgid`),
   KEY `conversationid` (`conversationid`),
-  KEY `subject` (`subject`(100))
+  KEY `subject` (`subject`(100)),
+  FULLTEXT KEY `text` (`text`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 
 

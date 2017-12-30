@@ -655,7 +655,7 @@ div[group-active=true]:hover {
     margin: 2px;
 }
 
-#gpc-img-upload-form input[type=text]:focus, select:focus {
+#gpc-img-upload-form input[type=text]:focus, #gpc-img-upload-form select:focus {
     border:2px solid #337ab7 !important;
 }
 
@@ -1173,3 +1173,4 @@ a #photoDB-preview:hover {
     color: #000;
 }
 
+#nette-debug {z-index: 111;}

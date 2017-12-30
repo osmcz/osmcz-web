@@ -76,7 +76,6 @@ class Helpers
             $line = $out[$i];
             if (!$opened AND preg_match("/^\s*[-~_]{5,}.*[-~_]{5,}\s*$/", $line)) {
                 $opened = $i;
-                echo $line;
                 continue;
             }
             if (abs($opened-$i) < 3 AND !preg_match("/^\s*[a-zA-Z]+: /", $line)) {
@@ -90,7 +89,6 @@ class Helpers
         }
 
         $s = implode("\n", $out);
-
         return preg_replace('~(https?://)([^ \n\r\t()<\>[\]]+)~is', '<a href="\\1\\2" target="_blank" rel="nofollow">\\1\\2</a>', $s);
     }
 

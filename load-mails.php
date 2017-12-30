@@ -12,16 +12,14 @@ if(!function_exists('gzdecode')){
   }
 }
 
-/*/ get current mbox archive
-//$url = "https://lists.openstreetmap.org/pipermail/talk-cz/" .
-$url =     date('Y-F') . ".txt";
+// get current mbox archive
+$url = "https://lists.openstreetmap.org/pipermail/talk-cz/" . date('Y-F') . ".txt";
 $mbox = file_get_contents($url);
 if (!$mbox) {
     $url .= ".gz";
     $mbox = gzdecode(file_get_contents($url));
 }
 
-dibi::query('DELETE FROM mailarchive WHERE YEAR(`date`) = %i', date('Y'), ' AND MONTH(`date`) = %i', date('n'));
 insertMailsFromMbox($mbox);
 
 /*/

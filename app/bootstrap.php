@@ -33,7 +33,6 @@ $oldFrontRouter = $container->router[1];
 $container->router[1] = new RouteList('Front');
 $container->router[1][] = new Route('talkcz/c<id [0-9]+>', 'Talkcz:conversation', isset($_SERVER['HTTPS']) ? Route::SECURED : false);
 $container->router[1][] = new Route('talkcz/<month [0-9]{6}>', 'Talkcz:default', isset($_SERVER['HTTPS']) ? Route::SECURED : false);
-$container->router[1][] = new Route('talkcz/search/', 'Talkcz:search', isset($_SERVER['HTTPS']) ? Route::SECURED : false);
 $container->router[1][] = new Route('talkcz/<stub .+-[0-9a-f]{5}>', 'Talkcz:author', isset($_SERVER['HTTPS']) ? Route::SECURED : false);
 
 $container->router[1][] = new Route('<osmtype (node|way|relation)>/<osmid [0-9]+>', array( //osmcz JS URLs
