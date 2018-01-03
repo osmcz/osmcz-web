@@ -1160,17 +1160,16 @@ a #photoDB-preview:hover {
 .mailarchive.search .body {white-space: normal;}
 .mailarchive.search .body a {color: #000;}
 .mailarchive.search .body a:hover {text-decoration: none; background: #ffff66}
-
+.highlight {
+    background: #ffff66;
+    color: #000;
+}
 
 .jumptarget::before {
     content:"";
     display:block;
     height:60px; /* fixed header height*/
     margin:-60px 0 0; /* negative fixed header height */
-}
-.highlight {
-    background: #ffff66;
-    color: #000;
 }
 
 #nette-debug {z-index: 111;}

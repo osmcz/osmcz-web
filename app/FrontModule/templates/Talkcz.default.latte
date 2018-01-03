@@ -31,7 +31,7 @@
             </option>
             {/foreach}
         </select>
-        <a class="ajax" n:href="this $next->format(Ym)">Další měsíc &raquo;</a>
+        <a class="ajax" n:href="this $next->format(Ym)" n:if="$next <= new DateTime">Další měsíc &raquo;</a>
     </div>
     {/block}
     <h2>{$month|date:n|czechMonth} {$month|date:Y}</h2>
@@ -58,7 +58,7 @@
 
 
     <p>Tento mirror je obnovován každých 5 minut.</p>
-    <p>Archiv na mailserveru: <a href="http://lists.openstreetmap.org/pipermail/talk-cz">lists.openstreetmap.org/pipermail/talk-cz</a></p>
+    <p>Zdrojový archiv na mailserveru: <a href="http://lists.openstreetmap.org/pipermail/talk-cz">lists.openstreetmap.org/pipermail/talk-cz</a></p>
 
 
 

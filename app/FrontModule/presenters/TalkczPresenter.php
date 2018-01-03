@@ -129,8 +129,10 @@ class Front_TalkczPresenter extends Front_BasePresenter
                 LEFT JOIN (SELECT count(msgid) talk_cz_mails, `from` FROM mailarchive GROUP BY `from`) m1 ON m.from = m1.from
 		    WHERE MATCH(text) AGAINST (%s",$query," IN BOOLEAN MODE)
 		    ORDER BY date DESC, MATCH(text) AGAINST (%s",$query,") DESC
+		    LIMIT 501
 	    ");
 
+        $this->template->count = count($result);
         $this->template->results = $result->fetchAssoc('conversationid,#');
         $this->template->query = $query;
     }

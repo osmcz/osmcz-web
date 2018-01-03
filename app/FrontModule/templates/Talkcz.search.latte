@@ -5,6 +5,7 @@
 <div class="container" n:snippet="content">
     {block monthList}
         <div class="pull-right margin-top-10">
+            <a class="ajax" n:href="default date(Ym)">&laquo; zpět</a> |
             <select onchange="jQuery.nette.callUrl(this)">
                 <option>-- měsíc --</option>
                 {foreach $monthList as $m}
@@ -25,7 +26,14 @@
             </span>
         </div><!-- /input-group -->
     </form>
-    <p><i>Pozn.: Vyhledávání hledá v celém textu mailu včetně citovaných částí.</i></p>
+    <p><i>Pozn.: Hledá se v celém textu mailu včetně citovaných částí.</i></p>
+
+    {if !$count}
+    <div class="alert alert-warning">Nenalezeny žádné výsledky.</div>
+    {/if}
+
+
+    <p n:if="$count > 500" class="alert alert-info">Nalezeno více než 500 výsledků, zobrazeno prvních 500.</p>
 
     <div class="mailarchive search">
         {foreach $results as $result}
@@ -58,6 +66,7 @@
         {/foreach}
     </div>
     <hr>
+    <p n:if="$count > 500" class="alert alert-info">Nalezeno více než 500 výsledků, zobrazeno prvních 500.</p>
 
     {include #monthList}
 
