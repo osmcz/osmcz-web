@@ -27,6 +27,8 @@ Možno doplnit štítek o jakou část projektu se jedná:
 * **Commit message formát:** `<část aplikace>: <co se děje> #id`  -- nebo vizte [vzor](https://github.com/osmcz/osmcz/commits/master)
 * Commit message i komentáře v kódu prosíme **anglicky**
 
+* Publikace na web vychází z větve `production`. Zkontrolujte, že případné změny `index.html` jsou přeneseny do patřičného `\*.latte`.
+
 ### Zaslání úpravy ke schválení
 Nejsnazší cesta je nechat si to forknout githubem a rovnou vytvořit pull request.
 
@@ -40,9 +42,20 @@ Ideálně prosím dělat feature commity a psát srozumitelné commit message. P
 *(Interní poznámka pro lidi s write-access: neklikat na tlačítko merge, nýbrž použít rebase)*
 
 ### Technologie
-* Leaflet 0.7.3 http://leafletjs.com/
-* Bootstrap 3.3.6 http://getbootstrap.com/ - používat zejména css komponenty odsud
-* jQuery 1.11.3 http://jquery.com/
+* Leaflet 1.0.3 http://leafletjs.com/
+* Bootstrap 3.3.7 http://getbootstrap.com/ - používat zejména css komponenty odsud
+* jQuery 3.1.1 http://jquery.com/
 * kvůli snazší editovatelnosti komunitou nepoužíváme tyto:
  * LESS css compiler
  * ES6 compiler
+
+### Organizace repozitáře
+Hlavní vývojová větev je [master](https://github.com/osmcz/osmcz/tree/master), která zároveň slouží k otestování provedených změn.
+Po otestování je aktualizována větev [production](https://github.com/osmcz/osmcz/tree/production), která je následně nasazena na openstreetmap.cz.
+
+#### Interní poznámka pro správce
+Překlopení master větve do production větve se dělá pomocí:
+```shell
+git checkout production
+git reset --hard master
+```

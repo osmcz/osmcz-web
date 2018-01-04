@@ -12,11 +12,10 @@ osmcz.poiPopup = function (map) {
 osmcz.permanentlyDisplayed = false;
 osmcz._marker = L.circleMarker([0, 0]);
 osmcz._map = false;
-
+osmcz.poiPopupOpen = false;
 
 // static methods
 osmcz.poiPopup.load = function (object) {
-    var fakeHttps = location.host === 'openstreetmap.cz' ? '/proxy.php/' : 'http://';
 
     // exit when osm object does not exists or osmid is null
     if ((! object) || (! "id" in object) ) {
@@ -33,7 +32,7 @@ osmcz.poiPopup.load = function (object) {
 
             osmcz.permanentlyDisplayed = true;
 
-            var geojson = osm_geojson.osm2geojson(data)
+            var geojson = osm_geojson.osm2geojson(data);
             var feature = geojson.features[0];
             var tags = feature.properties;
             feature.properties = {  //poloha.net style
@@ -63,16 +62,18 @@ osmcz.poiPopup.load = function (object) {
 
             //set icon and show
             var icon = osmcz.iconsService.get(feature.properties.tags);
-            $('#map-container').addClass('searchbar-on');
-            $('#map-searchbar').html(osmcz.poiPopup.getHtml(feature, icon.options.iconUrl));
+            poiSidebar.setContent(osmcz.poiPopup.getHtml(feature, icon.options.iconUrl));
+            poiSidebar.show();
+            osmcz.poiPopupOpen = true;
         }
     });
 
 };
 
 osmcz.poiPopup.open = function (feature, icon) {  //currently from active-layer
-  $('#map-container').addClass('searchbar-on');
-  $('#map-searchbar').html(osmcz.poiPopup.getHtml(feature, icon));
+  poiSidebar.setContent(osmcz.poiPopup.getHtml(feature, icon));
+  poiSidebar.show();
+  osmcz.poiPopupOpen = true;
   document.title = 'OpenStreetMap.cz';
   if (feature.properties.tags.name) {
     document.title = feature.properties.tags.name + ' ~ OpenStreetMap.cz';
@@ -83,11 +84,14 @@ osmcz.poiPopup.open = function (feature, icon) {  //currently from active-layer
 osmcz.poiPopup.close = function () {
     console.log('poi-popup: close');
 
+    if (!osmcz.poiPopupOpen) {
+        return;
+    }
+
     osmcz._map.removeLayer(osmcz._marker);
     osmcz.permanentlyDisplayed = false;
-
-    //if (!$('#map-container').hasClass('js_active-layer-on'))
-    $('#map-container').removeClass('searchbar-on');
+    osmcz.poiSidebar.hide();
+    osmcz.poiPopupOpen = false;
 
     document.title = 'OpenStreetMap.cz';
 
@@ -104,7 +108,7 @@ osmcz.poiPopup.setUrl = function (p) {
         : ('?' + p.osm_type + '=' + p.osm_id);
 
     history.replaceState('', '', path + location.hash);
-}
+};
 
 
 // ------- POI panel template  -------
@@ -140,10 +144,10 @@ osmcz.poiPopup.getHtml = function (feature, icon, embedded) {
 
     // Not needed when we are inside popup
     if (!embedded) {
-      tpl.push(osmcz.permanentlyDisplayed ? '<a class="close">&times;</a>' : '');
+//       tpl.push(osmcz.permanentlyDisplayed ? '<a class="close">&times;</a>' : '');
       tpl.push('<h4>');
-      tpl.push('<img src="' + icon + '">&nbsp;');
-      tpl.push(feature.properties.tags.name || 'Bod zájmu');
+      tpl.push('<img class="poi-icon" src="' + icon + '">&nbsp;');
+      tpl.push('<span class="h4-text">' + (feature.properties.tags.name || 'Bod zájmu') + '</span>');
       tpl.push('</h4>');
     }
 
@@ -260,7 +264,7 @@ osmcz.poiPopup.getHtml = function (feature, icon, embedded) {
     }
 
     //tpl.push('<div class="osmid"><a href="http://osm.org/' + osm_type + '/' + id + '">osm ID: ' + osm_type + '/' + id + '</a></div>');
-    tpl.push('<div class="osmid"><a href="http://osmap.cz/' + osm_type + '/' + id + '">osmap.cz/' + osm_type + '/' + id + '</a></div>'); // @FIXME: asi by mělo být taky HTTPS?
+    tpl.push('<div class="osmid"><a href="https://osmap.cz/' + osm_type + '/' + id + '">osmap.cz/' + osm_type + '/' + id + '</a></div>');
     tpl.push('<div id="wikimedia-commons" data-osm-id="' + id + '"></div>');
     tpl.push('<div id="guidepost" data-osm-id="' + id + '"></div>');
     tpl.push('<div id="mapillary-photo" data-osm-id="' + id + '"></div>');
@@ -277,7 +281,7 @@ osmcz.poiPopup.getHtml = function (feature, icon, embedded) {
         }, 0);
     }
 
-    // url of ajax proxy server for wikipedia and wikimedia
+    // url of ajax proxy server for wikipedia and wikimedia (CORS not HTTPS)
     var xhd_proxy_url = 'https://openstreetmap.cz/xhr_proxy.php';
 
     // Show picture from wikimedia commons if there is `wikidata` or `wikimedia_commons` or `wikipedia` tag
@@ -358,7 +362,7 @@ osmcz.poiPopup.getHtml = function (feature, icon, embedded) {
             + '<img class="commons_logo" src="' + osmcz.basePath + 'img/commons_logo.png" height="24"></a>'
             + 'Foto z Wikipedie</h5>'
             + '<a href="_descriptionshorturl">'
-            + '<img src="_thumburl" width="250">'
+            + '<img src="_thumburl" >'
             + '</a>';
 
         var wcm = $('#wikimedia-commons');
@@ -393,8 +397,8 @@ osmcz.poiPopup.getHtml = function (feature, icon, embedded) {
         else {
             var ref = feature.properties.tags.ref;
             $.ajax({
-                url: 'https://api.openstreetmap.cz/table/close?lat=' + lat + '&lon=' + lon + '&distance=50&limit=1', // @TODO: upravit, až bude HTTPS verze
-                //url: 'http://api.openstreetmap.cz/table/ref/' + ref,
+                url: 'https://api.openstreetmap.cz/table/close?lat=' + lat + '&lon=' + lon + '&distance=50&limit=1',
+                //url: 'https://api.openstreetmap.cz/table/ref/' + ref,
                 data: {
                     outputFormat: 'application/json',
                     output: 'geojson'
@@ -410,11 +414,12 @@ osmcz.poiPopup.getHtml = function (feature, icon, embedded) {
 
     var gpTpl = '<h5>Foto rozcestníku</h5>'
         + '<a href="_imgUrl">'
-        + '  <img src="_imgUrl" width="250">'
+        + '<div id="thumbnailLoadSpinner" class="text-center"><span class="glyphicon glyphicon-refresh text-info gly-spin"></span><br></div>'
+        + '<img id="thumbnailImage" src="" class="center-block"/>'
         + '</a>'
         + '<div class="margin-top-05"><b>Fotografii poskytl: </b> _autor'
         + '<span style="margin: 0.5em"/>'
-        + ' <a href="http://api.openstreetmap.cz/table/id/_id" target="_blank" class="btn btn-default btn-xs">' // @TODO: upravit, až bude HTTPS verze
+        + ' <a href="https://api.openstreetmap.cz/table/id/_id" target="_blank" class="btn btn-default btn-xs">'
         + '   <span class="glyphicon glyphicon-pencil" title="upravit"></span> upravit</a>'
         + '</div>'
 
@@ -425,9 +430,31 @@ osmcz.poiPopup.getHtml = function (feature, icon, embedded) {
             if (!feature.guidepost.features.length)
                 return;
             var autor = feature.guidepost.features[0].properties.attribution;
-            var imgUrl = 'http://api.openstreetmap.cz/' + feature.guidepost.features[0].properties.url; // @TODO: upravit, až bude HTTPS verze
+            var imgName = feature.guidepost.features[0].properties.name;
+            var imgUrl = feature.guidepost.features[0].properties.url;
+            var fullImgUrl = 'https://api.openstreetmap.cz/' + imgUrl;
             var gpostId = feature.guidepost.features[0].properties.id;
-            gp.html(gpTpl.replace(/_autor/g, autor).replace(/_imgUrl/g, imgUrl).replace(/_id/g, gpostId));
+            gp.html(gpTpl.replace(/_autor/g, autor).replace(/_imgUrl/g, fullImgUrl).replace(/_id/g, gpostId));
+
+            // get guidepost thumbnail from photodb cache server first
+            // if it fails, request it from phpThumb
+            var tb = new Image();
+            tb.onload = function(){
+                $('#thumbnailLoadSpinner').hide();
+                $('#thumbnailImage').attr('src', tb.src);
+            };
+            tb.onerror = function(){
+                var tbUrl = 'https://api.openstreetmap.cz/p/phpThumb.php?sia='+ imgName +'&w=250&src=https://api.openstreetmap.cz/' + imgUrl;
+                if (tb.src != tbUrl ) {
+                    tb.src = tbUrl;
+                } else {
+                    $('#thumbnailLoadSpinner').html('<br><span class="glyphicon glyphicon-picture bigger semigrey thumbnail crossed" title="Náhled není k dispozici."><span><br>');
+                    $('#thumbnailLoadSpinner').attr('class','text-nowrap text-center');
+
+                }
+            };
+            tb.src = "https://osm.fit.vutbr.cz/photodb/250px/" + imgName;
+
         }
     }
 
@@ -459,10 +486,10 @@ osmcz.poiPopup.getHtml = function (feature, icon, embedded) {
         }
     }
 
-    // "_key" se nahrazuje OSM IDčkem
-    var mpTpl = '<h5>Nejbližší foto</h5>'
+    // "_key" se nahrazuje mapillary IDčkem
+    var mpTpl = '<h5>Nejbližší street-view</h5>'
         + '<a href="https://www.mapillary.com/map/im/_key/photo">'
-        + '<img src="' + fakeHttps + 'images.mapillary.com/_key/thumb-320.jpg" width="250" height="187">'
+        + '<img src="' + osmcz.fakeHttps + 'images.mapillary.com/_key/thumb-320.jpg" height="187">'  //@todo https viz https://github.com/mapillary/mapillary_issues/issues/2419
         + '</a>';
 
     function showMapillary() {

@@ -1,7 +1,7 @@
 /*
  guidepost check from OsmHiCheck for osmcz
  Javascript code for openstreetmap.cz website
- Copyright (C) 2015,2016
+ Copyright (C) 2015-2017
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -23,12 +23,12 @@ and
  */
 
 var osmcz = osmcz || {};
-osmcz.gpcheck = function(map, baseLayers, overlays, controls) {
+osmcz.gpcheck = function(map, baseLayers, overlays, controls, group) {
     // -- constructor --
 
     var layersControl = controls.layers;
     var xhr;
-    var check_markers = L.markerClusterGroup({code: 'B'});
+    var check_markers = L.markerClusterGroup({code: 'B', chunkedLoading: true, chunkProgress: update_progress_bar});
     var autoload_lock = false;
 
     // ExifMarker - show line between OSM and Exif coors
@@ -293,11 +293,11 @@ osmcz.gpcheck = function(map, baseLayers, overlays, controls) {
     });
 
     /* Add overlay to the map */
-    layersControl.addOverlay(check_markers, "Chybné rozcestníky");
+    layersControl.addOverlay(check_markers, "Chybné rozcestníky", group);
 
     /* Add overlay to the overlays list as well
      * This allows restoration of overlay state on load */
-    overlays["Chybné rozcestníky"] = check_markers;
+    overlays[group]["Chybné rozcestníky"] = check_markers;
 
     // -- methods --
 
@@ -617,7 +617,7 @@ osmcz.gpcheck = function(map, baseLayers, overlays, controls) {
         var imgMsg = $('#gpc-img-upload-form[data-osm-id="' + osmid + '"] #gpc-img-message');
         var submitBtn = $('#gpc-img-upload-form[data-osm-id="' + osmid + '"] #submitBtn');
 
-        if (imgMsg.contents().size() == 0 &&
+        if (imgMsg.contents().length == 0 &&
             !osmcz.authorError &&
             !osmcz.coorsError
            )
@@ -770,6 +770,17 @@ osmcz.gpcheck = function(map, baseLayers, overlays, controls) {
 
     function error_gj(data) {
         console.log(data);
+    }
+
+    function update_progress_bar(processed, total, elapsed, layers_array) {
+      if (elapsed > 1000) {
+        // if it takes more than a second to load, display the progress bar:
+        // tbd see http://leaflet.github.io/Leaflet.markercluster/example/marker-clustering-realworld.50000.html
+      }
+
+      if (processed === total) {
+        // all markers processed - hide the progress bar:
+      }
     }
 };
 

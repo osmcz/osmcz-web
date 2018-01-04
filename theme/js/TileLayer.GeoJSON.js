@@ -2,8 +2,14 @@
 L.TileLayer.Ajax = L.TileLayer.extend({
     _requests: [],
     _addTile: function (tilePoint) {
-        var tile = { datum: null, processed: false };
-        this._tiles[tilePoint.x + ':' + tilePoint.y] = tile;
+        var tile = {
+            datum: null,
+            processed: false,
+            el: document.createElement('div'),  // TODO QuickFix, this element should not be created at all
+            coords: tilePoint
+        };
+        var key = this._tileCoordsToKey(tilePoint);
+        this._tiles[key] = tile;
         this._loadTile(tile, tilePoint);
     },
     // XMLHttpRequest handler; closure over the XHR object, the layer, and the tile
@@ -15,15 +21,15 @@ L.TileLayer.Ajax = L.TileLayer.extend({
             var s = req.status;
             if ((s >= 200 && s < 300) || s === 304) {
                 tile.datum = req.responseText && JSON.parse(req.responseText) || {type: "FeatureCollection", features: []};
-                layer._tileLoaded(tile, tilePoint);
+                layer._tileReady(tilePoint, null, tile);
             } else {
-                layer._tileLoaded(tile, tilePoint);
+                layer._tileReady(tilePoint, s, tile);
             }
         };
     },
     // Load the requested tile via AJAX
     _loadTile: function (tile, tilePoint) {
-        this._adjustTilePoint(tilePoint);
+//         this._adjustTilePoint(tilePoint);
         var layer = this;
         var req = new XMLHttpRequest();
         this._requests.push(req);
@@ -31,8 +37,8 @@ L.TileLayer.Ajax = L.TileLayer.extend({
         req.open('GET', this.getTileUrl(tilePoint), true);
         req.send();
     },
-    _reset: function () {
-        L.TileLayer.prototype._reset.apply(this, arguments);
+    _resetView: function () {
+        L.TileLayer.prototype._resetView.apply(this, arguments);
         for (var i = 0; i < this._requests.length; i++) {
             this._requests[i].abort();
         }
@@ -66,11 +72,12 @@ L.TileLayer.GeoJSON = L.TileLayer.Ajax.extend({
         map.removeLayer(this.geojsonLayer);
         L.TileLayer.Ajax.prototype.onRemove.call(this, map);
     },
-    _reset: function () {
+    _resetView: function () {
         this.geojsonLayer.clearLayers();
+        this._removeTilesAtZoom(this._map.getZoom());
         this._keyLayers = {};
         this._removeOldClipPaths();
-        L.TileLayer.Ajax.prototype._reset.apply(this, arguments);
+        L.TileLayer.Ajax.prototype._resetView.apply(this, arguments);
     },
 
     // Remove clip path elements from other earlier zoom levels
@@ -144,7 +151,7 @@ L.TileLayer.GeoJSON = L.TileLayer.Ajax.extend({
             this._map.addLayer(this._clipPathRectangles[clipPathId]);
 
             // Add a clip path element to the SVG defs element
-            // With a path element that has the hidden rectangle's SVG path string  
+            // With a path element that has the hidden rectangle's SVG path string
             var path = document.createElementNS(L.Path.SVG_NS, 'path');
             var pathString = this._clipPathRectangles[clipPathId].getPathString();
             path.setAttribute('d', pathString);
@@ -162,7 +169,7 @@ L.TileLayer.GeoJSON = L.TileLayer.Ajax.extend({
     // * If the options.unique function is specified, merge geometries into GeometryCollections
     // grouped by the key returned by options.unique(feature) for each GeoJSON feature
     // * If options.clipTiles is set, and the browser is using SVG, perform SVG clipping on each
-    // tile's GeometryCollection 
+    // tile's GeometryCollection
     addTileData: function (geojson, tilePoint) {
         var features = L.Util.isArray(geojson) ? geojson : geojson.features,
             i, len, feature;
@@ -198,7 +205,7 @@ L.TileLayer.GeoJSON = L.TileLayer.Ajax.extend({
 
             // Transform the geojson into a new Layer
             try {
-                incomingLayer = L.GeoJSON.geometryToLayer(geojson, options.pointToLayer, options.coordsToLatLng);
+                incomingLayer = L.GeoJSON.geometryToLayer(geojson, options);
             }
             // Ignore GeoJSON objects that could not be parsed
             catch (e) {
@@ -220,7 +227,7 @@ L.TileLayer.GeoJSON = L.TileLayer.Ajax.extend({
         else {
             // Transform the geojson into a new layer
             try {
-                incomingLayer = L.GeoJSON.geometryToLayer(geojson, options.pointToLayer, options.coordsToLatLng);
+                incomingLayer = L.GeoJSON.geometryToLayer(geojson, options);
             }
             // Ignore GeoJSON objects that could not be parsed
             catch (e) {
@@ -245,8 +252,8 @@ L.TileLayer.GeoJSON = L.TileLayer.Ajax.extend({
         return this;
     },
 
-    _tileLoaded: function (tile, tilePoint) {
-        L.TileLayer.Ajax.prototype._tileLoaded.apply(this, arguments);
+    _tileReady: function (tilePoint, err, tile) {
+        L.TileLayer.Ajax.prototype._tileReady.apply(this, arguments);
         if (tile.datum === null) { return null; }
         this.addTileData(tile.datum, tilePoint);
     }

@@ -1,18 +1,16 @@
 // (c) 2016 osmcz-app, https://github.com/osmcz/osmcz
 
 var osmcz = osmcz || {};
-osmcz.activeLayer = function (map, baseLayers, overlays, controls) {
+osmcz.activeLayer = function (map) {
     // -- constructor --
 
     var timeout;
-    var geojsonURL = 'http://tile.poloha.net/json/{z}/{x}/{y}';
-    if (location.host === 'openstreetmap.cz')
-        geojsonURL = '/proxy.php/tile.poloha.net/json/{z}/{x}/{y}';
-
+    var geojsonURL = 'https://tile.poloha.net/json/{z}/{x}/{y}';
 
     var geojsonTileLayer = new L.TileLayer.GeoJSON(geojsonURL, {
             maxZoom: 25,
-            code: 'A'  //clipTiles, unique
+            code: 'A' ,  //clipTiles, unique
+            basic: true
         }, {
             style: {
                 clickable: true
@@ -26,7 +24,8 @@ osmcz.activeLayer = function (map, baseLayers, overlays, controls) {
 
                 if (!(layer instanceof L.Point)) {
                     layer.on('click', function (event) {
-                        if (event.target && event.target.feature) {
+                        if (event.target && event.target.feature &&
+                            !osmcz.sidebar.isVisible()) {
                             console.log('active-layer: click', event.target.feature);
 
                             clearTimeout(timeout);
@@ -39,7 +38,7 @@ osmcz.activeLayer = function (map, baseLayers, overlays, controls) {
                     });
 
                     layer.on('mouseover', function (event) {
-                        if (osmcz.permanentlyDisplayed)
+                        if (osmcz.permanentlyDisplayed || osmcz.sidebar.isVisible())
                             return;
 
                         if (event.target && event.target.feature) {
@@ -50,7 +49,8 @@ osmcz.activeLayer = function (map, baseLayers, overlays, controls) {
                         }
                     });
                     layer.on('mouseout', function (event) {
-                        if (!osmcz.permanentlyDisplayed) {
+                        if (!osmcz.permanentlyDisplayed &&
+                            !osmcz.sidebar.isVisible()) {
                             clearTimeout(timeout);
                             timeout = setTimeout(function () {
                                 defaultPoiPanel();
@@ -62,36 +62,26 @@ osmcz.activeLayer = function (map, baseLayers, overlays, controls) {
         }
     );
 
-    //add as overlay
-    overlays["Aktivní vrstva"] = geojsonTileLayer;
-
-    map.on('layeradd', function (event) {
-        if (event.layer == geojsonTileLayer) {
-            //$('#map-container').addClass('searchbar-on js_active-layer-on');
-            //defaultPoiPanel();
-        }
-    });
-    map.on('layerremove', function (event) {
-        if (event.layer == geojsonTileLayer) {
-            //$('#map-container').removeClass('searchbar-on js_active-layer-on');
-        }
-    });
-
     //reset panel
     function resetPanel() {
         console.log('active-layer: reset-panel');
+
+        if (!osmcz.poiPopupOpen) {
+            return;
+        }
 
         osmcz.poiPopup.close();
         defaultPoiPanel();
     }
 
-    $('#map-searchbar').on('click', '.close', resetPanel);  // TODO delegate closing on poiPopup.close() and fire event
-    map.on('click', resetPanel);
-
-
     function defaultPoiPanel() {
-        $('#map-container').removeClass('searchbar-on');
-        //$('#map-searchbar').html("Najeďte myší na bod nebo klikněte.");
+        osmcz.poiSidebar.hide();
+        osmcz.poiSidebar.setContent('');
     }
 
+    map.on('click', resetPanel);
+
+    osmcz.poiSidebar.on('hidden', resetPanel);
+
+    return geojsonTileLayer;
 };
