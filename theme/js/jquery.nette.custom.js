@@ -47,7 +47,6 @@ jQuery.extend({
                     $('html, body').animate({scrollTop: $(id).offset().top}, 200);
                 }
             }
-
         },
 
         callUrl: function (obj) {
