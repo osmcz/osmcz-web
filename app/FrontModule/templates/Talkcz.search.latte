@@ -1,0 +1,73 @@
+{block title}[Talk-cz] Vyhledávání: {$query}{/block}
+{block map}{include #osmczmap}{/block}
+
+{block content}
+<div class="container" n:snippet="content">
+    {block monthList}
+        <div class="pull-right margin-top-10">
+            <a class="ajax" n:href="default date(Ym)">&laquo; zpět</a> |
+            <select onchange="jQuery.nette.callUrl(this)">
+                <option>-- měsíc --</option>
+                {foreach $monthList as $m}
+                <option value="{link default $m->ym}">
+                    {$m->date|date:n|czechMonth} {$m->date|date:Y} ({$m->count})
+                </option>
+                {/foreach}
+            </select>
+        </div>
+    {/block}
+
+    <h2>{include #title}</h2>
+    <form action="{link search}" role="search" class="pull-right margin-top-10" style="width: 200px">
+        <div class="input-group">
+            <input type="text" name="query" class="form-control" placeholder="Search for..." value="{$query}">
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+            </span>
+        </div><!-- /input-group -->
+    </form>
+    <p><i>Pozn.: Hledá se v celém textu mailu včetně citovaných částí.</i></p>
+
+    {if !$count}
+    <div class="alert alert-warning">Nenalezeny žádné výsledky.</div>
+    {/if}
+
+
+    <p n:if="$count > 500" class="alert alert-info">Nalezeno více než 500 výsledků, zobrazeno prvních 500.</p>
+
+    <div class="mailarchive search">
+        {foreach $results as $result}
+            {foreach $result as $r}
+                <h2 n:if="$iterator->first"><a n:href="conversation $r->conversationid" class="ajax">{$r->subject}</a></h2>
+
+                {var $mid = substr(md5($r->msgid),-6)}
+                <div id="m{$mid}" class="jumptarget" style="margin-left: 1em">
+                    <div class="header">
+                        <div class="date" title="msgid: {$r->msgid}">
+                            <b>{$r->date|date:'j.n.Y h:i:s'}</b> (<a n:href="conversation#m{$mid} $r->conversationid" class="ajax">#</a>)
+                        </div>
+                        <img src="{$r->img ? $r->img : $template->gravatar($r->from)}" alt="gravatar" width="32" height="32" class="avatar">
+                        <h3> <a class="ajax" n:href="author $template->talkstub($r->from)">{$r->name ?: 'N/A'}</a></h3>
+                        &lt;{$r->from|replace:"@":" at "}&gt;
+                        <br>
+                        <span class="stat" title="Počet příspěvků v konferenci talk-cz"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>{$r->talk_cz_mails}</span>
+                        {if $r->username}
+                            {* <h3> <a class="ajax" n:href="author $template->talkstub($r->from)">{$r->fullname}</a></h3> *}
+                            <span class="stat" title="Počet changesetů na osm.org (účet {$r->username} vytvořen {$r->account_created|date:'j.n.Y'})"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>{$r->changesets}</span>
+                        {/if}
+
+                    </div>
+                    <div class="body">
+                        <a n:href="conversation#m{$mid} $r->conversationid" class="ajax">{!$r->text|excerpt:$query}</a>
+                    </div>
+                </div>
+                <hr>
+            {/foreach}
+        {/foreach}
+    </div>
+    <hr>
+    <p n:if="$count > 500" class="alert alert-info">Nalezeno více než 500 výsledků, zobrazeno prvních 500.</p>
+
+    {include #monthList}
+
+</div>

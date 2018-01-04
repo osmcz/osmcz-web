@@ -1,0 +1,48 @@
+{block title}[Talk-cz] {$subject}{/block}
+{block map}{include #osmczmap}{/block}
+
+{block content}
+<div class="container" n:snippet="content">
+    <div class="pull-right margin-top-10">
+        <a class="ajax" n:href="default $max->format(Ym)" class="ajax">&laquo; zpět na výpis měsíce</a> |
+        <select onchange="jQuery.nette.callUrl(this)">
+            {foreach $monthList as $m}
+                <option value="{link default $m->ym}" n:attr="selected => ($m->ym == $max->format(Ym))">
+                    {$m->date|date:n|czechMonth} {$m->date|date:Y} ({$m->count})
+                </option>
+            {/foreach}
+        </select>
+    </div>
+    <h2>{include #title}</h2>
+    <p>Vlákno <b>{$min|date:'j.n.'}{$minYear} - {$max|date:'j.n.Y'}</b>, počet zpráv: <b>{$count}</b>
+
+    <div class="mailarchive">
+    {foreach $result as $r}
+        <hr>
+        {var $mid = substr(md5($r->msgid),-6)}
+        <div id="m{$mid}" class="jumptarget">
+            <div class="header">
+                <div class="date" title="{$r->subject}
+msgid: {$r->msgid}">
+                    <b>{$r->date|date:'j.n.Y h:i:s'}</b> (<a href="#m{$mid}">#{$iterations+1}</a>)
+                </div>
+                <img src="{$r->img ? $r->img : $template->gravatar($r->from)}" alt="gravatar" width="32" height="32" class="avatar">
+                <h3> <a class="ajax" n:href="author $template->talkstub($r->from)">{$r->name ?: 'N/A'}</a></h3>
+                &lt;{$r->from|replace:"@":" at "}&gt;
+                <br>
+                <span class="stat" title="Počet příspěvků v konferenci talk-cz"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>{$r->talk_cz_mails}</span>
+                {if $r->username}
+                    {* <h3> <a class="ajax" n:href="author $template->talkstub($r->from)">{$r->fullname}</a></h3> *}
+                    <span class="stat" title="Počet changesetů na osm.org (účet {$r->username} vytvořen {$r->account_created|date:'j.n.Y'})"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span>{$r->changesets}</span>
+                {/if}
+            </div>
+            <div class="body">{!$r->text|talkMailBody}</div>
+        </div>
+    {/foreach}
+    </div>
+    <hr>
+     <a class="ajax" n:href="default $max->format(Ym)" class="pull-right">&laquo; zpět na výpis měsíce</a>
+
+    {* REPLY LINK: mailto:talk-cz%40openstreetmap.org?Subject=Re%3A%20%5BTalk-cz%5D%20%3D%3Futf-8%3Fb%3FTmV1csSNaXTDqSDEjcOhcnkgdiBCcm7Emw%3D%3D%3F%3D&In-Reply-To=%3C4p.8LDB.2zCXIrjrMdQ.1Q8JYU%40seznam.cz%3E *}
+
+</div>

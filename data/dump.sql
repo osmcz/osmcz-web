@@ -13,7 +13,12 @@ CREATE TABLE `mailarchive` (
   `from` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `name` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `subject` text COLLATE utf8_czech_ci NOT NULL,
-  `text` text COLLATE utf8_czech_ci NOT NULL
+  `text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_czech_ci NOT NULL,
+  `conversationid` int(11) NOT NULL,
+  PRIMARY KEY (`msgid`),
+  KEY `conversationid` (`conversationid`),
+  KEY `subject` (`subject`(100)),
+  FULLTEXT KEY `text` (`text`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 
 
