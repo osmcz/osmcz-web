@@ -109,7 +109,8 @@ class PagesModel extends Object {
 				"name" => "root"), array());
 	}
 
-	public static function getPageBySeoname($seoname, $lang){
+	public static function getPageBySeoname($seoname, $lang = false){
+        if(!$lang) $lang = self::$lang;
 		$page = dibi::fetch("SELECT * FROM pages WHERE lang = %s",$lang," AND seoname = %s",$seoname," AND deleted=0");
 		if($page)
 			return self::pagesModelNode($page);
