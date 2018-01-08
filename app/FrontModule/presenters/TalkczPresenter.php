@@ -29,7 +29,7 @@ class Front_TalkczPresenter extends Front_BasePresenter
     {
         if (!$month OR !preg_match("~^(\d{4})(\d{2})$~", $month, $matches)) {
             $defaultMonth = dibi::fetchSingle("SELECT DATE_FORMAT(max(`date`), '%Y%m') FROM mailarchive");
-            $this->redirect('this', ['month' => $defaultMonth]);
+            $this->redirect('this', array('month' => $defaultMonth));
         }
 
         $this->template->result = dibi::query("

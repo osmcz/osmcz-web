@@ -40,7 +40,6 @@ common:
 			database: openstreetmap_cz
 			username: root
 			password:
-			charset: utf8mb4
 			profiler:
 				run: false
 

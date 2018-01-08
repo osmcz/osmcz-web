@@ -51,7 +51,7 @@ class Helpers
         //$s = preg_replace('~==([^=]+)==[\r\n]+~is', '<h2>\\1</h2>', $s);
         //$s = preg_replace('~\*([^*]+)\*~iU', '<b>\\1</b>', $s);
         $opened = false;
-        $out = [];
+        $out = array();
         foreach(explode("\n", $s) as $line) {
             $isQuote = preg_match("~^(\s*&gt;\s*){1,}~", $line);
             if (!$opened && $isQuote) {

@@ -14,7 +14,8 @@ production < common:
 			database: abc
 			username: 
 			password: 
-	
+			charset: utf8mb4
+
 		npress:
 			preferCdnJquery: true
 	
