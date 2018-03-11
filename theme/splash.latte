@@ -1,10 +1,9 @@
 {block title}OpenStreetMap.cz{/block}
 {block layout_aftertitle}{/block}
-
 {block map}{include #osmczmap}{/block}
 
 {block content}
-<div class="container splash">
+<div class="container splash" {if $_SERVER['REQUEST_URI'] == '/splash'}style="display:block"{/if}>
 
     <div class="row">
         <div class="content-box-inner jumbotron col-md-8 col-md-offset-2 bottom-spacer">
@@ -18,9 +17,10 @@
                 <a href="/komunita">komunita</a> Vám zde nabízí mapovou aplikaci, své <a href="/projekty">projekty</a>, odborníky
                 či&nbsp;<a href="/skoleni">školení</a>.</p>
 
-            <p style="font-size:85%;">Tento web je zatím beta-verze, zapojte se do bouřlivého vývoje na <a
-                        href="https://github.com/osmcz/osmcz"><img src="https://github.com/favicon.ico" width="13"
-                                                                   style="margin:0 4px" alt="">githubu</a>.</p>
+            <p style="font-size:85%;">Tento web je veřejná beta-verze od <a href="/talkcz/c1491">1/2016</a>,
+                občasný vývoj na <a href="https://github.com/osmcz/osmcz"><img
+                            src="https://github.com/favicon.ico" width="13"
+                            style="margin:0 4px" alt="">githubu</a>.</p>
 
             <p><a href="/vyuziti" class="btn btn-primary btn-large">Zjistit více o OSM</a>
                 <a href="/galerie" class="btn btn-large">Prohlédnout galerii</a></p>
@@ -38,17 +38,14 @@
                 </div>
 
                 <div class="content-box-inner">
-                    <img src="https://maps.me/en/images/mapsme_logo.svg" alt="maps.me">
+                    <img src="/theme/img/mapsme/mapsme_logo.svg" alt="MAPS.ME">
 
                     <p class="text3">Detailní a zcela offline mapy pro všechny mobilní zařízení. Včetně navigace a
                         offline editace POI.</p>
 
-                    <a href="https://maps.me/iphone-app-pro" title="MAPS.ME in the Apple AppStore"><img height="33"
-                                                                                                        src="https://maps.me/images/appstore_badge.svg"></a>
-                    <a href="https://maps.me/android-app-pro" title="MAPS.ME in the Google Play Store"><img height="33"
-                                                                                                            src="https://maps.me/images/googleplay_badge.svg"></a>
-                    <a href="https://maps.me/amazon-app-pro" title="MAPS.ME in the Amazon AppStore"><img height="33"
-                                                                                                         src="https://maps.me/images/amazon_badge.svg"></a>
+                    <a href="https://maps.me/iphone-app-pro" title="MAPS.ME in the Apple AppStore"><img height="33" src="/theme/img/mapsme/appstore.svg" alt="AppStore"></a>
+                    <a href="https://maps.me/android-app-pro" title="MAPS.ME in the Google Play Store"><img height="33" src="/theme/img/mapsme/googleplay.svg" alt="Google Play"></a>
+                    <a href="https://maps.me/amazon-app-pro" title="MAPS.ME in the Amazon AppStore"><img height="33" src="/theme/img/mapsme/amazon.svg" alt="Amazon AppStore"></a>
                     <br><a class="text-muted" href="https://maps.me/get">další platformy</a>
                 </div>
             </div>
@@ -107,9 +104,7 @@
                         </div>
                         <!-- /input-group -->
                         <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-                        <div style="position: absolute; left: -5000px;"><input type="text"
-                                                                               name="b_cb9a83e4c66e393586b89e370_81b42f6aac"
-                                                                               tabindex="-1" value=""></div>
+                        <div style="position: absolute; left: -5000px;"><input type="text" name="b_cb9a83e4c66e393586b89e370_81b42f6aac" tabindex="-1" value=""></div>
                     </form>
                     <p>&nbsp;</p>
 

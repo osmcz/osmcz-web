@@ -41,6 +41,16 @@
 
 <div id="modal-container"></div>
 
+<div n:if="$_SERVER['HTTP_HOST'] != 'openstreetmap.cz'" class="alert alert-warning" style="position:fixed;bottom:10px;z-index:9999;right:10px;padding:3px;">
+    <strong>POZOR!</strong>
+    Toto je <a href="https://github.com/osmcz/osmcz-web">testovací web OSMCZ</a><br>
+    na doméně {$_SERVER['HTTP_HOST']}.<br>
+    Pro ostrou verzi, prosím, přejděte <br>
+    na <a href="https://openstreetmap.cz">openstreetmap.cz</a>.
+    <button class="close close-overlay" onclick="$(this).parent().hide()">&times;</button>
+</div>
+
+
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
