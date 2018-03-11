@@ -1,3 +1,17 @@
+# Website configuration
+
+Main configuration is stored here. See [nette-2.0 docs](https://doc.nette.org/en/2.0/configuring#toc-framework-configuration)
+
+Common configuration can be extended for development or production.
+Then the file `config.local.neon` is loaded - a file which contains password and thus it is not commited to git.
+
+
+
+## config.neon
+
+Example config.neon - see more languages
+
+```yaml
 #
 # SECURITY WARNING: it is CRITICAL that this file is NOT accessible directly via a web browser!
 #
@@ -60,3 +74,5 @@ production < common:
 
 development < common:
 console < common:
+
+```

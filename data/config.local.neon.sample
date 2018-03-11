@@ -18,6 +18,7 @@ production < common:
 
 		npress:
 			preferCdnJquery: true
+			adminPassword: necotajneho
 	
 	
 		
