@@ -25,6 +25,11 @@ FileTemplate::extensionMethod('excerpt', function ($that, $text, $query) {
 
 
 
+// https://stackoverflow.com/questions/34115174/error-related-to-only-full-group-by-when-executing-a-query-in-mysql
+// https://stackoverflow.com/questions/23921117/disable-only-full-group-by
+dibi::query("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");
+
+
 
 if (isset($_SERVER['HTTPS'])) Route::$defaultFlags = Route::SECURED;
 
