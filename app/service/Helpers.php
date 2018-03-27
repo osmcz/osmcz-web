@@ -90,7 +90,7 @@ class Helpers
 
         $s = implode("\n", $out);
 
-        // cant stop on &gt;  .. so we hack it
+        // cant stop regexp on whole "&gt;"  .. so we hack it
         $s = str_replace("&gt;", ")&gt;", $s);
         $s = preg_replace('~(https?://)([^ \n\r\t()[\]]+)~is', '<a href="\\1\\2" target="_blank" rel="nofollow noopener">\\1\\2</a>', $s);
         $s = str_replace(")&gt;", "&gt;", $s);

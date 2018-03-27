@@ -1,0 +1,118 @@
+{block title}Školení{/block}
+{block #content}
+<style n:syntax="off">ol li { margin-bottom: 0.3em }</style>
+<div class="container">
+<div class="row">
+	<div class="col-md-8" style="overflow: hidden">
+		<div class="pull-right">
+			<div class="flashes" style="position:absolute;margin-left:-70px">
+				<div n:foreach="$flashes as $flash" class="flash alert alert-success">
+					{$flash->message}
+				</div>&nbsp;
+				<script>window.setTimeout(function(){ $('.flashes div').fadeOut(8000); }, 5000);</script> {* za 5sec už je $ inicializován *}
+			</div>
+			{control userForm}
+			Na email vám do týdne přijde prezentace.
+		</div>
+		<h3>Školení OpenStreetMap</h3>
+		<ol>
+			<li>Registrujte se na <a href="https://www.openstreetmap.org/user/new" target="_blank" rel="noopener">webu OpenStreetMap.org</a>
+			<li>Potvrďte registrační email
+			<li>Vyplňte do formulář vpravo svůj <b>OSM účet</b>
+			<li>Na webu OpenStreetMap.org klikněte nahoře na <b>[Upravit]</b>
+			<li>Klikněte na velké tlačítko <b>[Prohlídku editoru]</b>
+		</ol>
+		<p>Užitečné odkazy: <a href="https://wiki.openstreetmap.org/wiki/Cs:Map_Features">Map_features</a>, <a href="https://wiki.osm.org/">wiki.osm.org</a>
+
+
+
+		<div style="clear:both"><hr></div>
+		<p>Zde můžete napsat vzkaz/dotaz ostatním na školení, třeba i vyměnit nějaké CWG.</p>
+        {snippet postform}
+			{control postForm}
+		{/snippet}
+
+		<br>
+
+		{snippet posts}
+			<?php
+			function linkify($s) {
+				$s = htmlspecialchars($s);
+				$s = preg_replace('~==([^=]+)==[\r\n]+~is', '<h2>\\1</h2>', $s);
+				$s = preg_replace('~\*([^*]+)\*~iU', '<b>\\1</b>', $s);
+				return preg_replace('~(https?://)([^ \n\r\t]+)~is', '<a href="\\0" target="_blank" rel="noopener">\\0</a>', $s);
+			}
+			?>
+			{foreach dibi::query('SELECT * FROM live_posts ORDER BY time desc -- WHERE time > NOW() - INTERVAL 1 week') as $r}
+				<b><span class="label label-success">{$r->time|date:'j.n.Y H:i'} {$r->name}</span></b><br>
+				{!linkify($r->text)|nl2br}
+				<hr>
+			{/foreach}
+		{/snippet}
+
+
+	</div><!--/span-->
+	<div class="col-md-4">
+		<p>Dnešní školení:
+
+		{snippet userlist|strip}
+			<table>
+			{foreach dibi::query('SELECT * FROM live_users_online WHERE registred=CURDATE() OR DATE(online)=CURDATE() ORDER BY registred, name') as $r}
+				{block #userrow}
+					<tr>
+					<td>
+						<a href="http://www.geocaching.com/profile/?u={$r->gc|url}" title="Profil GC: {$r->gc}" n:if="$r->gc">
+							<img src="http://www.geocaching.com/favicon.ico" width=16>&nbsp;
+						</a>
+					<td title="{$r->fullname}" style="min-width: 100px">
+						<span n:class="label, $r->isonline ? label-success : label-warning">{$r->name}</span>
+						<i n:if="$r->fullname" class="icon-comment" onclick="alert(parentNode.title)"></i>
+					{if $r->osm}
+					<td title="Profil OSM: {$r->osm}, počet editací: {$r->osmedit}">
+						<a href="http://www.openstreetmap.org/user/{$r->osm}"><img src="http://www.openstreetmap.org/favicon.ico" width=16></a>
+						{if $r->osmedit <= -1}účet neexistuje
+						{elseif $r->osmedit}<i class="glyphicon glyphicon-ok"></i> <small>{!$r->osmedit>1 ? "$r->osmedit &times;" : ''}</small>
+						{/if}
+					{/if}
+				{/block}
+			{/foreach}
+			</table>
+		{/snippet}
+
+
+		<p>Po najetí na ikonku se zobrazí bublina s textem.
+
+		<hr>
+			{var $datum = FALSE}
+			<table>
+			{foreach dibi::query('SELECT * FROM live_users_online WHERE registred!=CURDATE() ORDER BY registred DESC, name') as $r}
+				{if $datum != $r[registred]}
+					{var $datum = $r[registred]}
+					</table>
+					<p><br>Školení {$datum|date:'j.n.Y'}:
+					<table>
+				{/if}
+
+
+				{include #userrow r => $r}
+			{/foreach}
+			</table>
+
+
+	</div><!--/span-->
+
+</div><!--/row-->
+</div><!--/container-->
+
+<script n:syntax="off">
+	setInterval(function(){
+	    var url = '?do=refresh';
+
+        $.ajax({
+            url: url,
+            type: 'get',
+            dataType: "json",
+            success: jQuery.nette.success.bind({url: url})
+        });
+	}, 10*1000);
+</script>
