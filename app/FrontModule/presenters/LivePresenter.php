@@ -148,8 +148,8 @@ class Front_LivePresenter extends Front_BasePresenter
             if(!$ww){
                 dibi::query("UPDATE live_users SET osmedit = -404 WHERE user_id=%i",$r->user_id);
             }
-            elseif(preg_match_all('~/history.*<span class=\'count-number\'>([0-9]+)</span>~isU', $ww, $m)){
-                dibi::query("UPDATE live_users SET osmedit = %s",$m[1][0]," WHERE user_id = %i",$r->user_id);
+            elseif(preg_match_all('~/history.*<span class=\'count-number\'>([,0-9]+)</span>~isU', $ww, $m)){
+                dibi::query("UPDATE live_users SET osmedit = %s",str_replace(",","", $m[1][0])," WHERE user_id = %i",$r->user_id);
             }
         }
         echo microtime(true) - $time . " sec";
