@@ -45,7 +45,7 @@ class Helpers
 
     public static function talkMailBody($s)
     {
-        $startQuoteHtml = "<a href='#' onclick='$(this).next().toggle();return false;'>[&hellip;]</a>\n<div class='quoted'>";
+        $startQuoteHtml = "<a href='#' onclick='$(this).next().toggle();return false;' class='btn btn-default btn-xs'>zobrazit citaci</a>\n<div class='quoted'>";
 
         $s = htmlspecialchars($s);
         //$s = preg_replace('~==([^=]+)==[\r\n]+~is', '<h2>\\1</h2>', $s);

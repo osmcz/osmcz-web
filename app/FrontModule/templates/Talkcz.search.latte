@@ -18,7 +18,7 @@
     {/block}
 
     <h2>{include #title}</h2>
-    <form action="{link search}" role="search" class="pull-right margin-top-10" style="width: 200px">
+    <form action="{link search}" role="search" class="pull-right margin-top-10 text-right" style="width: 200px">
         <div class="input-group">
             <input type="text" name="query" class="form-control" placeholder="Search for..." value="{$query}">
             <span class="input-group-btn">
@@ -26,7 +26,11 @@
             </span>
         </div><!-- /input-group -->
     </form>
-    <p><i>Pozn.: Hledá se v celém textu mailu včetně citovaných částí.</i></p>
+    <p>
+        <i>Pozn.: Toto vyhledávání je velmi "beta". Hledá se v celém textu mailu včetně citovaných částí.</i>
+    <p>Zkuste raději:
+        <a href="https://www.google.cz/search?as_sitesearch=https://openstreetmap.cz/talkcz&as_q={$query}" class="btn btn-default btn-mini">Prohledat tento archiv Googlem</a>
+
 
     {if !$count}
     <div class="alert alert-warning">Nenalezeny žádné výsledky.</div>
