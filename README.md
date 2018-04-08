@@ -1,14 +1,14 @@
 # osmcz-web
 
-PHP backend for [OpenStreetMap.cz](https://openstreetmap.cz/) built on [nPress cms](https://github.com/zbycz/npress). 
+PHP backend pro OpenStreetMap.cz postavený na [nPress cms](https://github.com/zbycz/npress). 
+JS mapová appka je v repozitáři [osmcz-app](https://github.com/osmcz/osmcz-app). 
 
 * **LIVE verze:** [openstreetmap.cz](https://openstreetmap.cz/) 
-* **[ISSUE TRACKER](https://github.com/osmcz/osmcz/issues?q=is%3Aopen+is%3Aissue+label%3Aosmcz-web)** - repo osmcz / label osmcz-web
-* [DEV DEMO](https://devosm.zby.cz/) - auto-deploy z větve `devosm`
+* **ISSUES:** [na githubu osmcz-app](https://github.com/osmcz/osmcz/issues?q=is%3Aopen+is%3Aissue+label%3Aosmcz-web)
+* **DEMO:** [devosm.zby.cz](https://devosm.zby.cz/) - auto-deploy z větve `devosm`
 
 
 ## Jak přispět do projektu
-
 * Frontendová část (osmcz-app) viz. [osmcz/osmcz](https://github.com/osmcz/osmcz)
 * Zde je website v PHP s redakčním systémem a rozšíření nPressu (složky `data`, `app` a `theme`) - viz compare 
 * Aktuální branche:
@@ -26,20 +26,23 @@ Více v npressím [INSTALL.md](INSTALL.md)
 5. spustit ve složce `php -S localhost:8080`
 6. otevřít http://localhost:8080 
 
-### Nasátí změn z `osmcz-app`
 
+### Nasátí změn z `osmcz-app`
 ```bash
-TODO
+rm -r ./theme/
+cp -r ../osmcz-app/* ./theme/
+git add -a
 git commit -m "deployed osmcz-app v0.20\nosmcz/osmcz@8c0f9e413fefe8f3c4361e96a7eb656cd8023b93"
 ```
 
+
 ## Deploy na ostrou verzi
-
+```
 TODO
-
+git tag deploy_20181231
+```
 
 ## Autor, licence
-
-(c) 2014-2018 Pavel Zbytovský, http://zby.cz
+(c) 2014-2018 [Pavel Zbytovský](https://zby.cz) a další
 
 Pod licencí MIT - volně šiřte, prodávejte, zachovejte uvedení autora.
