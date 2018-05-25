@@ -23,7 +23,7 @@ class Front_OauthPresenter extends Front_BasePresenter
     const REQUEST_TOKEN_URL = 'https://www.openstreetmap.org/oauth/request_token';
     const ACCESS_TOKEN_URL = 'https://www.openstreetmap.org/oauth/access_token';
     const AUTHORIZE_URL = 'https://www.openstreetmap.org/oauth/authorize';
-    const API_URL = 'http://api.openstreetmap.org/api/0.6/';
+    const API_URL = 'https://api.openstreetmap.org/api/0.6/';
 
 
     public function startup()
