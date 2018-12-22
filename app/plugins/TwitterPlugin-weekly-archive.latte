@@ -1,0 +1,49 @@
+<table>
+{var $year = false}
+{foreach $weeklys as $t}
+    {if $year != (new DateTime($t[created_at]))->format('Y')}
+        </table>
+        {var $year = (new DateTime($t[created_at]))->format('Y')}
+        <h4 id="y{$year}" class="jumptarget">
+          {$year}
+          <a href="#y{$year}" onclick="$(this).parent().next().toggle()" class="small" n:if="$iterations">zobrazit &raquo;</a>
+        </h4>
+        <table class="table tweets" {if $iterations}style="display: none"{/if}>
+            <colgroup>
+                <col width="130">
+            </colgroup>
+    {/if}
+    <tr>
+        <td>
+            <a href="{$t[weekly_link]}">{$t[weekly_title]}</a>
+            <br>
+
+        </td>
+        <td>
+
+            {define #side}
+                <div style="float:right">
+                    <a class="permalink" href="https://twitter.com/{$t[user][screen_name]}/status/{$t[id_str]}">
+                        <time>{$t[created_at]|date:'j.n.Y'}</time>
+                    </a>
+                    <!--
+                    <a href="https://twitter.com/intent/tweet?in_reply_to={$t[id_str]}" title="Odpovědět" target="_blank"><span class="glyphicon glyphicon-share-alt"></span></a>
+                    <a href="https://twitter.com/intent/retweet?tweet_id={$t[id_str]}" title="Retweetnout" target="_blank"><span class="glyphicon glyphicon-retweet"></span> {$t[retweet_count]>0 ? $t[retweet_count]}</a>
+                    <a href="https://twitter.com/intent/like?tweet_id={$t[id_str]}" title="Lajknout" target="_blank"><span class="glyphicon glyphicon-heart"></span> {$t[favorite_count]>0 ? $t[favorite_count]}</a>
+                    -->
+                </div>
+            {/define}
+
+            {if strtotime($t['created_at']) < strtotime('2016-09-08')}
+                {include #side}
+                {!preg_replace("/^(.+?)(\. | \.)(.*)/", "<b>\\1</b><br>\\3", $t['weekly_text'])}
+            {else}
+                {!$t[weekly_text]}
+                {include #side}
+            {/if}
+
+        </td>
+    </tr>
+{/foreach}
+</table>
+

@@ -79,9 +79,9 @@
         if (!file_exists($this->options['cache_dir'])) {
           mkdir($this->options['cache_dir'], 0755, true);
         }
-        $this->cache_file = $this->options['cache_dir'] . 'twitter.txt';
+//        $this->cache_file = $this->options['cache_dir'] . 'twitter.txt';
         $this->cache_file_raw = $this->options['cache_dir'] . 'twitter-array.txt';
-        $cache_file_timestamp = ((file_exists($this->cache_file))) ? filemtime($this->cache_file) : 0;
+        $cache_file_timestamp = ((file_exists($this->cache_file_raw))) ? filemtime($this->cache_file_raw) : 0;
         $this->add_debug_item('Cache expiration timestamp: ' . (time() - $this->options['cachetime']));
         $this->add_debug_item('Cache file timestamp: ' . $cache_file_timestamp);
         
@@ -89,7 +89,7 @@
         if (time() - $this->options['cachetime'] < $cache_file_timestamp) {
           $this->tweet_found = true;
           $this->add_debug_item('Cache file is newer than cachetime.');
-          $this->tweet_list = file_get_contents($this->cache_file);
+//          $this->tweet_list = file_get_contents($this->cache_file);
           $this->tweet_array = unserialize(file_get_contents($this->cache_file_raw));
         } else {
           $this->add_debug_item("Cache file doesn't exist or is older than cachetime.");
@@ -130,6 +130,7 @@
       $params = array(
         'screen_name' => $this->options['twitter_screen_name'],
         'count' => $this->options['tweets_to_retrieve'],
+        'tweet_mode' => 'extended',
       );
       if ($this->options['ignore_retweets']) {
         $params['include_rts'] = 'false';
@@ -144,25 +145,25 @@
       if ($response_code == 200) {
         $data = json_decode($this->tmhOAuth->response['response'], true);
 
-        $tweets_html = '';
-
-        // Iterate over tweets.
-        foreach($data as $tweet) {
-          $tweets_html .=  $this->parse_tweet($tweet);
-          // If we have processed enough tweets, stop.
-          if ($this->tweet_count >= $this->options['tweets_to_display']){
-            break;
-          }
-        }
-
-        // Close the twitter wrapping element.
-        $html = str_replace('{tweets}', $tweets_html, $this->options['twitter_template']);
+//          $tweets_html = '';
+//
+//        // Iterate over tweets.
+//        foreach($data as $tweet) {
+//          $tweets_html .=  $this->parse_tweet($tweet);
+//          // If we have processed enough tweets, stop.
+//          if ($this->tweet_count >= $this->options['tweets_to_display']){
+//            break;
+//          }
+//        }
+//
+//        // Close the twitter wrapping element.
+//        $html = str_replace('{tweets}', $tweets_html, $this->options['twitter_template']);
 
         if ($this->options['enable_cache']) {
           // Save the formatted tweet list to a file.
-          $file = fopen($this->cache_file, 'w');
-          fwrite($file, $html);
-          fclose($file);
+//          $file = fopen($this->cache_file, 'w');
+//          fwrite($file, $html);
+//          fclose($file);
 
           // Save the raw data array to a file.
           $file = fopen($this->cache_file_raw, 'w');
@@ -170,7 +171,7 @@
           fclose($file);
         }
 
-        $this->tweet_list = $html;
+//        $this->tweet_list = $html;
         $this->tweet_array = $data;
       } else {
         $this->add_debug_item('Bad tmhOAuth response code.');

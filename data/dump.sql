@@ -187,4 +187,17 @@ CREATE TABLE `users` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 
 
+DROP TABLE IF EXISTS `twitter_archive`;
+CREATE TABLE `twitter_archive` (
+  `id` varchar(100) COLLATE utf8_czech_ci NOT NULL,
+  `date` datetime NOT NULL,
+  `text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_czech_ci NOT NULL,
+  `serialized` text CHARACTER SET utf8mb4 COLLATE utf8mb4_czech_ci NOT NULL,
+  `weekly_topic` varchar(255) COLLATE utf8_czech_ci DEFAULT NULL,
+  `weekly_link` varchar(255) COLLATE utf8_czech_ci DEFAULT NULL,
+  `html_cache` text COLLATE utf8_czech_ci,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
+
+
 -- 2016-02-22 23:19:01
