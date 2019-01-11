@@ -64,7 +64,7 @@ function insertMailsFromMbox($mbox)
 
         $from = $e->getFieldDecoded('from');
         $name = "";
-        if (preg_match("/(.*) at (.*) \((.*)\)/", $from, $matches)) {
+        if (preg_match("/(.*) [an][ta] (.*) \((.*)\)/", $from, $matches)) {
             $from = "$matches[1]@$matches[2]";
             $name = $matches[3];
         }
