@@ -70,7 +70,7 @@ function insertMailsFromMbox($mbox)
         }
 
         $subject = $e->getSubject();
-        $subject = preg_replace('/^\[Talk-cz\] */', '', $subject);
+        $subject = preg_replace('/^\[[Tt]alk-cz\] */', '', $subject);
 
         // find conversation
         $cid = dibi::fetchSingle("
