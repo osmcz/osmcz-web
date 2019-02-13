@@ -14,140 +14,157 @@
  */
 class Front_OauthPresenter extends Front_BasePresenter
 {
-    private $config;
+  private $config;
 
-    /** @var OAuth
-     */
-    private $oauth;
+  /** @var OAuth
+   */
+  private $oauth;
 
-    const REQUEST_TOKEN_URL = 'https://www.openstreetmap.org/oauth/request_token';
-    const ACCESS_TOKEN_URL = 'https://www.openstreetmap.org/oauth/access_token';
-    const AUTHORIZE_URL = 'https://www.openstreetmap.org/oauth/authorize';
-    const API_URL = 'https://api.openstreetmap.org/api/0.6/';
+  const REQUEST_TOKEN_URL = 'https://www.openstreetmap.org/oauth/request_token';
+  const ACCESS_TOKEN_URL = 'https://www.openstreetmap.org/oauth/access_token';
+  const AUTHORIZE_URL = 'https://www.openstreetmap.org/oauth/authorize';
+  const API_URL = 'https://api.openstreetmap.org/api/0.6/';
 
+  public function startup()
+  {
+    parent::startup();
 
-    public function startup()
-    {
-        parent::startup();
+    $this->config = $this->context->parameters['osm_oauth'];
 
-        $this->config = $this->context->parameters['osm_oauth'];
+    $this->oauth = new OAuth(
+      $this->config['consumer_key'],
+      $this->config['consumer_secret'],
+      OAUTH_SIG_METHOD_HMACSHA1,
+      OAUTH_AUTH_TYPE_URI
+    );
+    $this->oauth->disableSSLChecks();
+  }
 
-        $this->oauth = new OAuth($this->config['consumer_key'], $this->config['consumer_secret'], OAUTH_SIG_METHOD_HMACSHA1, OAUTH_AUTH_TYPE_URI);
-        $this->oauth->disableSSLChecks();
+  // OAuth 1.0
+  public function actionLogin($backUrl = '/komunita')
+  {
+    try {
+      $this->getSession('oauth')->back_url = $backUrl;
+      $this->getUserDetailsAndLoginUser();
+      return;
+    } catch (OAuthException $E) {
+      // not authentized -> continue below in asking for new token
     }
 
-    // OAuth 1.0
-    public function actionLogin($backUrl = '/komunita')
-    {
-        try {
-            $this->getSession('oauth')->back_url = $backUrl;
-            $this->getUserDetailsAndLoginUser();
-            return;
+    // request token
+    $request_token_info = $this->oauth->getRequestToken(
+      self::REQUEST_TOKEN_URL
+    );
 
-        } catch (OAuthException $E) {
-            // not authentized -> continue below in asking for new token
-        }
+    //save secret
+    $this->getSession('oauth')->login_secret =
+      $request_token_info['oauth_token_secret'];
 
-        // request token
-        $request_token_info = $this->oauth->getRequestToken(self::REQUEST_TOKEN_URL);
+    //redirect
+    $this->redirectUrl(
+      self::AUTHORIZE_URL . "?oauth_token=" . $request_token_info['oauth_token']
+    );
+  }
 
-        //save secret
-        $this->getSession('oauth')->login_secret = $request_token_info['oauth_token_secret'];
+  public function actionCallback($oauth_token)
+  {
+    try {
+      $login_secret = $this->getSession('oauth')->login_secret;
 
-        //redirect
-        $this->redirectUrl(self::AUTHORIZE_URL . "?oauth_token=" . $request_token_info['oauth_token']);
+      if (!$oauth_token) {
+        echo "Error! There is no OAuth token!";
+        exit();
+      }
+
+      if (!$login_secret) {
+        echo "Error! There is no OAuth secret!";
+        exit();
+      }
+
+      $this->oauth->enableDebug();
+      $this->oauth->setToken($oauth_token, $login_secret);
+
+      $access_token_info = $this->oauth->getAccessToken(self::ACCESS_TOKEN_URL);
+
+      $this->getSession('oauth')->login_secret = false;
+      $this->getSession('oauth')->token = $access_token_info['oauth_token'];
+      $this->getSession('oauth')->secret =
+        $access_token_info['oauth_token_secret'];
+
+      $this->getUserDetailsAndLoginUser();
+    } catch (OAuthException $E) {
+      Debugger::log($E); //zalogujeme for sichr
+      echo "OAuth login failed. Please, contact administrator.";
+      $this->terminate();
+    }
+  }
+
+  protected function getUserDetailsAndLoginUser()
+  {
+    $this->oauth->setToken(
+      $this->getSession('oauth')->token,
+      $this->getSession('oauth')->secret
+    );
+
+    //fetch user datail XML
+    $this->oauth->fetch(self::API_URL . "user/details");
+    $user_details = $this->oauth->getLastResponse();
+
+    $xml = simplexml_load_string($user_details);
+    $user = array(
+      'id' => $xml->user['id'],
+      'username' => $xml->user['display_name'],
+      'account_created' => $xml->user['account_created'],
+      'img' => $xml->user->img['href'],
+      'changesets' => $xml->user->changesets['count'],
+      'traces' => $xml->user->traces['count'],
+      'description' => $xml->user->description,
+      'home_lat' => $xml->user->home['lat'],
+      'home_lon' => $xml->user->home['lon'],
+      'last_login' => date("Y-m-d H:i:s")
+    );
+
+    // convert xml-nodes to strings
+    foreach ($user as &$val) {
+      $val = strval($val);
     }
 
+    $user['account_created'] = new DateTime($user['account_created']);
 
-    public function actionCallback($oauth_token)
-    {
-        try {
-
-            $login_secret = $this->getSession('oauth')->login_secret;
-
-            if (!$oauth_token) {
-                echo "Error! There is no OAuth token!";
-                exit;
-            }
-
-            if (!$login_secret) {
-                echo "Error! There is no OAuth secret!";
-                exit;
-            }
-
-            $this->oauth->enableDebug();
-            $this->oauth->setToken($oauth_token, $login_secret);
-
-            $access_token_info = $this->oauth->getAccessToken(self::ACCESS_TOKEN_URL);
-
-            $this->getSession('oauth')->login_secret = false;
-            $this->getSession('oauth')->token = $access_token_info['oauth_token'];
-            $this->getSession('oauth')->secret = $access_token_info['oauth_token_secret'];
-
-            $this->getUserDetailsAndLoginUser();
-
-        } catch (OAuthException $E) {
-            Debugger::log($E); //zalogujeme for sichr
-            echo "OAuth login failed. Please, contact administrator.";
-            $this->terminate();
-        }
-
+    // update db
+    $row = dibi::fetch('SELECT * FROM users WHERE id = %i', $user['id']);
+    if ($row) {
+      //better dont change usernames, we use it as primary key
+      unset($user['username']);
+      dibi::query('UPDATE users SET ', $user, ' WHERE id = %i', $user['id']);
+    } else {
+      $user['first_login'] = new DateTime();
+      dibi::query('INSERT INTO users ', $user);
     }
 
-    protected function getUserDetailsAndLoginUser()
-    {
-        $this->oauth->setToken($this->getSession('oauth')->token, $this->getSession('oauth')->secret);
+    // load complete row from db
+    $dbuser = dibi::fetch('SELECT * FROM users WHERE id = %i', $user['id']);
 
-        //fetch user datail XML
-        $this->oauth->fetch(self::API_URL . "user/details");
-        $user_details = $this->oauth->getLastResponse();
-
-        $xml = simplexml_load_string($user_details);
-        $user = array(
-            'id' => $xml->user['id'],
-            'username' => $xml->user['display_name'],
-            'account_created' => $xml->user['account_created'],
-            'img' => $xml->user->img['href'],
-            'changesets' => $xml->user->changesets['count'],
-            'traces' => $xml->user->traces['count'],
-            'description' => $xml->user->description,
-            'home_lat' => $xml->user->home['lat'],
-            'home_lon' => $xml->user->home['lon'],
-            'last_login' => date("Y-m-d H:i:s"),
-        );
-
-        // convert xml-nodes to strings
-        foreach ($user as &$val)
-            $val = strval($val);
-
-        $user['account_created'] = new DateTime($user['account_created']);
-
-        // update db
-        $row = dibi::fetch('SELECT * FROM users WHERE id = %i', $user['id']);
-        if ($row) {
-            //better dont change usernames, we use it as primary key
-            unset($user['username']);
-            dibi::query('UPDATE users SET ', $user, ' WHERE id = %i', $user['id']);
-
-        } else {
-            $user['first_login'] = new DateTime();
-            dibi::query('INSERT INTO users ', $user);
-        }
-
-        // load complete row from db
-        $dbuser = dibi::fetch('SELECT * FROM users WHERE id = %i', $user['id']);
-
-        if ($dbuser['webpages'] != 'admin' AND $dbuser['webpages'] != 'all')
-            $dbuser['webpages'] = '14' . ($dbuser['webpages'] ? ',' : '') . $dbuser['webpages'];
-
-        $this->user->login(new Identity($dbuser['username'], array($dbuser['webpages'] == 'admin' ? 'admin' : 'user'), $dbuser));
-
-        // remove all tokens - TODO if tokens to be used, save them in DB
-
-        $this->redirectUrl('//' . $_SERVER['HTTP_HOST'] . $this->getSession('oauth')->back_url);
+    if ($dbuser['webpages'] != 'admin' and $dbuser['webpages'] != 'all') {
+      $dbuser['webpages'] =
+        '14' . ($dbuser['webpages'] ? ',' : '') . $dbuser['webpages'];
     }
+
+    $this->user->login(
+      new Identity(
+        $dbuser['username'],
+        array($dbuser['webpages'] == 'admin' ? 'admin' : 'user'),
+        $dbuser
+      )
+    );
+
+    // remove all tokens - TODO if tokens to be used, save them in DB
+
+    $this->redirectUrl(
+      '//' . $_SERVER['HTTP_HOST'] . $this->getSession('oauth')->back_url
+    );
+  }
 }
-
 
 /*
 <osm version="0.6" generator="OpenStreetMap server">

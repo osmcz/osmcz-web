@@ -6,18 +6,20 @@ define("DONT_RUN_NPRESS_APP", true);
 require_once "index.php"; //db connection
 error_reporting(0);
 
-if(!function_exists('gzdecode')){
-  function gzdecode($data){
+if (!function_exists('gzdecode')) {
+  function gzdecode($data)
+  {
     return gzinflate(substr($data, 10, -8));
   }
 }
 
 // get current mbox archive
-$url = "https://lists.openstreetmap.org/pipermail/talk-cz/" . date('Y-F') . ".txt";
+$url =
+  "https://lists.openstreetmap.org/pipermail/talk-cz/" . date('Y-F') . ".txt";
 $mbox = file_get_contents($url);
 if (!$mbox) {
-    $url .= ".gz";
-    $mbox = gzdecode(file_get_contents($url));
+  $url .= ".gz";
+  $mbox = gzdecode(file_get_contents($url));
 }
 
 insertMailsFromMbox($mbox);
@@ -44,59 +46,75 @@ for ($y = 2007; $y <= date('Y'); $y++) {
 }
 //*/
 
-
 /**
  * @param $mbox plain text format
  */
 function insertMailsFromMbox($mbox)
 {
-    if (!$mbox) {
-        echo "Blank mbox. End.";
-        return;
+  if (!$mbox) {
+    echo "Blank mbox. End.";
+    return;
+  }
+
+  foreach (preg_split('/\nFrom .+?\n/', $mbox) as $r) {
+    $e = new PlancakeEmailParser($r);
+    if (
+      dibi::fetch(
+        "SELECT 1 FROM mailarchive WHERE msgid = %s",
+        $e->getHeader('message-id')
+      )
+    ) {
+      echo "msgid exists skipping<br>";
+      continue;
     }
 
-    foreach (preg_split('/\nFrom .+?\n/', $mbox) as $r) {
-        $e = new PlancakeEmailParser($r);
-        if(dibi::fetch("SELECT 1 FROM mailarchive WHERE msgid = %s", $e->getHeader('message-id'))) {
-            echo "msgid exists skipping<br>";
-            continue;
-        }
+    $from = $e->getFieldDecoded('from');
+    $name = "";
+    if (preg_match("/(.*) [an][ta] (.*) \((.*)\)/", $from, $matches)) {
+      $from = "$matches[1]@$matches[2]";
+      $name = $matches[3];
+    }
 
-        $from = $e->getFieldDecoded('from');
-        $name = "";
-        if (preg_match("/(.*) [an][ta] (.*) \((.*)\)/", $from, $matches)) {
-            $from = "$matches[1]@$matches[2]";
-            $name = $matches[3];
-        }
+    $subject = $e->getSubject();
+    $subject = preg_replace('/^\[[Tt]alk-cz\] */', '', $subject);
 
-        $subject = $e->getSubject();
-        $subject = preg_replace('/^\[[Tt]alk-cz\] */', '', $subject);
-
-        // find conversation
-        $cid = dibi::fetchSingle("
+    // find conversation
+    $cid = dibi::fetchSingle(
+      "
           SELECT conversationid 
           FROM mailarchive 
-          WHERE msgid = %s",$e->getHeader('in-reply-to'), "
-            OR BINARY subject = %s", $subject);
+          WHERE msgid = %s",
+      $e->getHeader('in-reply-to'),
+      "
+            OR BINARY subject = %s",
+      $subject
+    );
 
-        if (!$cid) $cid = dibi::fetchSingle("SELECT max(conversationid)+1 FROM mailarchive");
-        if (!$cid) $cid = 1;
-
-        if ($from == "=?UTF-8?Q?Petr_Mor=c3=a1vek_ (=?UTF-8?Q?Petr_Mor=c3=a1vek_)") {  // mailman broken
-            $name = "Petr Morávek [Xificurk]";
-            $from = "petr@pada.cz";
-        }
-
-        dibi::query("INSERT INTO mailarchive", array(
-            "msgid" => $e->getHeader('message-id'),
-            "replyid" => $e->getHeader('in-reply-to'),
-            "date" => date("Y-m-d H:i:s", strtotime($e->getHeader('date'))),
-            "from" => $from,
-            "name" => $name,
-            "subject" => $subject,
-            "text" => $e->getPlainBody(),
-            "conversationid" => $cid,
-        ));
-        echo ".";
+    if (!$cid) {
+      $cid = dibi::fetchSingle("SELECT max(conversationid)+1 FROM mailarchive");
     }
+    if (!$cid) {
+      $cid = 1;
+    }
+
+    if (
+      $from == "=?UTF-8?Q?Petr_Mor=c3=a1vek_ (=?UTF-8?Q?Petr_Mor=c3=a1vek_)"
+    ) {
+      // mailman broken
+      $name = "Petr Morávek [Xificurk]";
+      $from = "petr@pada.cz";
+    }
+
+    dibi::query("INSERT INTO mailarchive", array(
+      "msgid" => $e->getHeader('message-id'),
+      "replyid" => $e->getHeader('in-reply-to'),
+      "date" => date("Y-m-d H:i:s", strtotime($e->getHeader('date'))),
+      "from" => $from,
+      "name" => $name,
+      "subject" => $subject,
+      "text" => $e->getPlainBody(),
+      "conversationid" => $cid
+    ));
+    echo ".";
+  }
 }

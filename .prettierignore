@@ -11,3 +11,6 @@ static/lightbox
 static/mediaelement
 static/uploadify
 static/bootstrap.css
+app/service/PlancakeEmailParser.php
+app/service/twitter
+theme/
