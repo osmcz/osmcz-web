@@ -16,8 +16,6 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
         maxZoom: 24,
         attribution: osmAttr + ", <a href='https://www.mapbox.com/about/maps/'>Mapbox</a>",
         code: 'x',
-        osmczDefaultLayer: true,
-        basic: true
     });
 
     var turisticka = L.tileLayer("https://tile.poloha.net/{z}/{x}/{y}.png", {
@@ -42,7 +40,9 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
     var wikimediamap = L.tileLayer("https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}" + retinaSuffix + ".png", {
         maxZoom: 18,
         attribution: osmAttr + ', <a href="https://www.mediawiki.org/wiki/Maps">Wikimedia</a>',
-        code: 'w'
+        code: 'w',
+        basic: true,
+        osmczDefaultLayer: true,
     });
 
     var ocm = L.tileLayer("https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}" + retinaSuffix + ".png?apikey=" + thunderforestAPIkey, {
@@ -115,6 +115,22 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
         basic: true
     });
 
+    var ipr_last = L.tileLayer("https://osm-{s}.zby.cz/tiles_ipr_last.php/{z}/{x}/{y}.png", {
+        minZoom: 12,
+        maxZoom: 22,
+        bounds: [[50.255, 14.113], [49.88, 14.8144]],
+        attribution: '&copy; <a href="http://www.iprpraha.cz/clanek/1305/ortofotomapy">IPR Praha</a>',
+        code: 'i'
+    });
+
+    var ipr_vege = L.tileLayer("https://osm-{s}.zby.cz/tiles_ipr_vege.php/{z}/{x}/{y}.png", {
+        minZoom: 12,
+        maxZoom: 22,
+        bounds: [[50.255, 14.113], [49.88, 14.8144]],
+        attribution: '&copy; <a href="http://www.iprpraha.cz/clanek/1305/ortofotomapy">IPR Praha</a>',
+        code: 'j'
+    });
+
     var metropolis = L.tileLayer("https://api.mapbox.com/styles/v1/severak/cinr478gg00aucam0o6lran4v/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1Ijoic2V2ZXJhayIsImEiOiJjaXQxenM2ZTEwMGIyMnRwZGMwZzF6Y2VsIn0.-uZbcCAI3ABqnbg6h1mrhQ", {
         maxZoom: 24,
         attribution: osmAttr + ', <a href=\'https://www.mapbox.com/about/maps/\'>Mapbox</a>, <a href=\'http://severak.svita.cz\'>Severák</a>',
@@ -168,6 +184,14 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
 
     // --- overlays
 
+    var stravaAllOverlay = L.tileLayer("https://osm.fit.vutbr.cz/strava/all/{z}/{x}/{y}.png", {
+        maxZoom: 16,
+        attribution: osmAttr + ', <a href="http://www.strava.com">strava.com</a>',
+        code: 'S',
+        opacity: 0.6,
+        basic: true
+    });
+    
     var turistikaOverlay = L.tileLayer("https://tile.poloha.net/kct/{z}/{x}/{y}.png", {
         maxZoom: 20,
         attribution: osmAttr + ', <a href="http://www.poloha.net">poloha.net</a>',
@@ -305,6 +329,8 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
     // Ortofoto group
     baseLayers["Letecké"] = {};
     baseLayers["Letecké"]["Ortofoto ČÚZK"] = ortofoto;
+    baseLayers["Letecké"]["Praha - IPR last"] = ipr_last;
+    baseLayers["Letecké"]["Praha - IPR vegetační půst"] = ipr_vege;
 
     overlays["Letecké"] = {};
     overlays["Letecké"]["Ortofoto popisky"] = ortofotoOverlay;
@@ -353,6 +379,7 @@ osmcz.layers = function (map, baseLayers, overlays, controls) {
     overlays["Speciální"]["Vedení vysokého napětí"] = powerOverlay;
     overlays["Speciální"]["Telekomunikační vysílače"] = commsOverlay;
     overlays["Speciální"]["Pole a louky (pLPIS)"] = lpisOverlay;
+    overlays["Speciální"]["Strava - všechny sporty ČR"] = stravaAllOverlay;
 
     // RUIAN group
     overlays["RÚIAN"] = {};

@@ -1,7 +1,7 @@
 /*
  guideposts for osmcz
  Javascript code for openstreetmap.cz website
- Copyright (C) 2015-2017
+ Copyright (C) 2015-2018 Michal Grézl and others (see https://github.com/osmcz/osmcz/ contributors)
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
         chunkProgress: update_progress_bar
     });
     var moving_marker;
+    var need_api_auth;
     var autoload_lock = false;
     var moving_flag = false;
     var gp_id;
@@ -89,6 +90,12 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
         iconAnchor: [23, 45]
     });
 
+    var emergency_icon = L.icon({
+        iconUrl: osmcz.basePath + "img/gp/emergency_point.png",
+        iconSize: [48, 48],
+        iconAnchor: [23, 45]
+    });
+
     var commons_icon = L.icon({
         iconUrl: osmcz.basePath + "img/commons_logo.png",
         iconSize: [35, 48],
@@ -111,7 +118,7 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
 
                         var i, tags_content = "";
                         for (i = 0; i < tags.length; i++) {
-                            tags_content += '<a href="https://api.openstreetmap.cz/table/hashtag/' + tags[i] + '"><span id="hashtag" class="label label-info">' + tags[i].replace(/:$/, "") + '</span></a> ';
+                            tags_content += '<a href="' + osmcz.photoDbUrl + '?tag=' + tags[i] + '"><span id="hashtag" class="label label-info">' + tags[i].replace(/:$/, "") + '</span></a> ';
                         }
                         return (tags_content);
                     } else {
@@ -134,10 +141,13 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
                     ftype = "infopane";
                 } else if (b.tags.indexOf("mapa") > -1) {
                     ftype = "map";
-                } else if (b.tags.indexOf("cyklo") > -1 &&
+                } else if (b.tags.indexOf("emergency") > -1 &&
+                    b.tags.indexOf("rozcestnik") == -1) {
+                    ftype = "emergency";
+                } else if ((b.tags.indexOf("cyklo") > -1 || b.tags.indexOf("silnicni") > -1) &&
                     b.tags.indexOf("pesi") == -1) {
                     ftype = "cycle";
-                } else if (b.tags.indexOf("cyklo") > -1 &&
+                } else if ((b.tags.indexOf("cyklo") > -1 || b.tags.indexOf("silnicni") > -1) &&
                     b.tags.indexOf("pesi") > -1) {
                     ftype = "cycle_foot";
                 }
@@ -153,22 +163,27 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
 
             var html_content = "";
             html_content += "Fotografii poskytl: ";
-            html_content += "<a href='https://api.openstreetmap.cz/table/name/" + b.attribution + "'>" + b.attribution + "</a>";
+            html_content += "<a href='" + osmcz.photoDbUrl + "?author=" + b.author + "'>" + b.author + "</a>";
             html_content += "<br>";
-            if (ftype == "guidepost") {
+            html_content += "Pořízeno: " + b.created;
+            html_content += "<br>";
+
+            if (ftype == "guidepost" || ftype == "emergency" || ftype == "cycle_foot" ) {
                 html_content += "Číslo rozcestníku: ";
-                html_content += "<a href='https://api.openstreetmap.cz/table/ref/" + (b.ref == "nevíme" ? "none" : b.ref) + "'>" + b.ref + "</a>";
+                html_content += "<a href='" + osmcz.photoDbUrl + "?ref=" + (b.ref == "nevíme" ? "none" : b.ref) + "'>" + b.ref + "</a>";
                 html_content += "<br>";
             }
-            html_content += "<a href='https://api.openstreetmap.cz/" + b.url + "'>";
+            html_content += "<div class='gp-thumbnail'>";
+            html_content += "<a href='" + osmcz.photoDbUrl + "files/" + b.id + ".jpg'>";
             html_content += "<div id='thumbnailLoadSpinner" + b.id + "' class='text-center'><br><span class='glyphicon glyphicon-refresh text-info gly-spin'></span></div>";
-            html_content += "<img id='thumbnailImage" + b.id + "' src='' class='center-block' width='180' />";
+            html_content += "<img id='thumbnailImage" + b.id + "' src='' class='center-block' />";
             html_content += "</a>";
+            html_content += "</div>";
 
             html_content += "<div id='hashtags'>" + parse_hashtags(b.tags) + "</div>";
 
             html_content += "<div class='buttons-bar'>";
-            html_content += "<a href='https://api.openstreetmap.cz/table/id/" + b.id + "'><button type='button' class='btn btn-default btn-xs'>";
+            html_content += "<a href='" + osmcz.photoDbUrl + "?id=" + b.id + "'><button type='button' class='btn btn-default btn-xs'>";
             html_content += '   <div class="glyphicon glyphicon-pencil"></div> Upravit';
             html_content += '</button></a>';
 
@@ -197,6 +212,9 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
                     break;
                 case "necitelne":
                     layer.setIcon(blurred_icon);
+                    break;
+                case "emergency":
+                    layer.setIcon(emergency_icon);
                     break;
                 default:
                     layer.setIcon(guidepost_icon);
@@ -233,30 +251,21 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
             return;
         }
 
-        // get guidepost thumbnail from photodb cache server first
-        // if it fails, request it from phpThumb
+        // get guidepost thumbnail from Fody
         popupMarker = e.popup._source;
-        var imgName = e.popup._source.feature.properties.name;
-        var imgUrl = e.popup._source.feature.properties.url;
         var id = e.popup._source.feature.properties.id;
-        if (imgName) {
+        if (id) {
             var tb = new Image();
+            tb.src = osmcz.photoDbUrl + "files/250px/" + id + ".jpg";
             tb.onload = function () {
                 popupThumbnail = tb.src;
                 $('#thumbnailLoadSpinner' + id).hide();
                 $('#thumbnailImage' + id).attr('src', tb.src);
             };
             tb.onerror = function () {
-                var tbUrl = 'https://api.openstreetmap.cz/p/phpThumb.php?sia=' + imgName + '&w=250&src=https://api.openstreetmap.cz/' + imgUrl;
-                if (tb.src != tbUrl) {
-                    tb.src = tbUrl;
-                } else {
-                    $('#thumbnailLoadSpinner' + id).html('<br><span class="glyphicon glyphicon-picture bigger semigrey thumbnail crossed" title="Náhled není k dispozici."><span><br>');
-                    $('#thumbnailLoadSpinner' + id).attr('class', 'text-nowrap text-center');
-
-                }
+                $('#thumbnailLoadSpinner' + id).html('<br><span class="glyphicon glyphicon-picture bigger semigrey thumbnail crossed" title="Náhled není k dispozici."><span><br>');
+                $('#thumbnailLoadSpinner' + id).attr('class', 'text-nowrap text-center');
             };
-            tb.src = "https://osm.fit.vutbr.cz/photodb/250px/" + imgName;
         }
     });
 
@@ -405,33 +414,91 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
     }
 
     osmcz.guideposts.prototype.finish_moving = function () {
-        moving_flag = false;
+
         if (moving_marker) {
             final_lat = moving_marker.getLatLng().lat;
             final_lon = moving_marker.getLatLng().lng;
-            destroy_moving_marker();
         } else {
-            alert("Vyberte novou pozici");
+            toastr.error('Nejprve prosím vyberte novou pozici.',
+                         'Chyba!',
+                        {
+                            closeButton: true,
+                            positionClass: "toast-bottom-center",
+                            timeOut: 0
+            });
+            return; // Do not sent false move request
+        }
+
+        var dataStr = 'id=' + gp_id + '&lat=' + final_lat + '&lon=' + final_lon;
+
+        //tkk - not used
+        //if (osmcz.user && osmcz.user.username) {
+        //    dataStr = dataStr + '&lname=' + osmcz.user.username;
+        //}
+
+        var note = document.getElementById("gp_usr_message").value;
+        if (note.length > 0) {
+          dataStr = dataStr + '&note=' + note;
         }
 
         $.ajax({
             type: 'POST',
-            url: 'https://api.openstreetmap.cz/table/move',
-            data: 'id=' + gp_id + '&lat=' + final_lat + '&lon=' + final_lon,
+            url: osmcz.photoDbUrl + 'api/move',
+            data: dataStr,
+            async: false,
+            xhrFields: {
+              withCredentials: true
+            },
             timeout: 3000
         })
             .done(function (data) {
+                toastr.success('Nová pozice byla uložena na server.', 'Děkujeme', {
+                       closeButton: true,
+                       positionClass: "toast-bottom-center"
+                });
+                if (moving_marker) {
+                    destroy_moving_marker();
+                }
+                moving_flag = false;
+                hide_sidebar();
                 return true;
             })
-            .fail(function () {
-                return false;
+            .fail(function(jqXHR, textStatus, errorThrown ) {
+              var status = jqXHR.status;
+              var statusText = jqXHR.statusText;
+              console.log('move failed ' + status);
+              if (status == 401) {
+                need_api_auth = true;
+                toastr.error('Nejste přihlášen(a).',
+                            'Chyba!',
+                            {
+                                closeButton: true,
+                                positionClass: "toast-bottom-center",
+                                timeOut: 0
+                });
+              } else {
+                toastr.error('Uložení nové pozice se nepovedlo. ' + status + ': ' + statusText,
+                            'Chyba!',
+                            {
+                                closeButton: true,
+                                positionClass: "toast-bottom-center",
+                                timeOut: 0
+                });
+              }
+              return false;
             })
             .always(function (data) {
             });
 
-        note.note_api(final_lat, final_lon, "id:" + gp_id + ": " + document.getElementById("gp_usr_message").value);
-
-        hide_sidebar();
+        if(need_api_auth) {
+            toastr.error('Nejste přihlášen(a).',
+                        'Chyba!',
+                        {
+                            closeButton: true,
+                            positionClass: "toast-bottom-center",
+                            timeOut: 0
+            });
+        }
     }
 
     function update_sidebar(distance, lat, lon) {
@@ -445,8 +512,10 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
 
     function hide_sidebar() {
         sidebar.hide();
-        popupMarker.setOpacity(1);
-        popupMarker = null;
+        if (popupMarker) {
+            popupMarker.setOpacity(1);
+            popupMarker = null;
+        }
         map.removeLayer(gpCircle);
         map.removeLayer(gpMarkerPolyline);
     }
@@ -455,6 +524,29 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
         sidebar.setContent(sidebar_init());
         sidebar.on('hidden', guideposts.cancel_moving);
         sidebar.show();
+
+        var auth = false;
+        xhr = $.ajax({
+            url: osmcz.photoDbUrl + 'api/logged',
+            async: false,
+            xhrFields: {
+              withCredentials: true
+            },
+        })
+          .done(function() {
+            auth = true; return true;
+          })
+          .fail(function(jqXHR, textStatus, errorThrown) {
+            var inner = [];
+            var content = document.getElementById("sidebar-content");
+            inner.push("<h4>Nejste přihlášeni!</h4>");
+            inner.push("<p class='text-center'><a href='" + osmcz.photoDbUrl + "' target='_blank'>Přihlaste</a> se prosím do PhotoDB API");
+            content.innerHTML = inner.join('');
+
+            return false;
+          });
+
+        if(!auth) return;
 
         var inner = [];
         var content = document.getElementById("sidebar-content");
@@ -508,6 +600,9 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
 
         xhr = $.ajax({
             url: url + L.Util.getParamString(parameters),
+            xhrFields: {
+              withCredentials: true
+            },
             success: success_callback,
             error: error_callback
         });
@@ -527,11 +622,11 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
 
             markers.clearLayers();
 
-            var geo_json_url = 'https://api.openstreetmap.cz/table/all';
+            var geo_json_url = osmcz.photoDbUrl + 'api/show';
             request_from_url(geo_json_url, retrieve_geojson, error_gj)
 
-            geo_json_url = 'https://api.openstreetmap.cz/commons';
-            request_from_url(geo_json_url, retrieve_commons, error_gj)
+            //geo_json_url = 'https://api.openstreetmap.cz/commons';
+            //request_from_url(geo_json_url, retrieve_commons, error_gj)
 
         } else {
             layer_guidepost.clearLayers();
@@ -541,7 +636,7 @@ osmcz.guideposts = function (map, baseLayers, overlays, controls, group) {
     function retrieve_geojson(data) {
         layer_guidepost.clearLayers();
         if (data != "") {
-            layer_guidepost.addData(JSON.parse(data));
+            layer_guidepost.addData(data); //we have text/json instead of api.osm.cz with text/plain
             markers.addLayer(layer_guidepost);
             map.addLayer(markers);
         }

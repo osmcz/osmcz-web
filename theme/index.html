@@ -17,12 +17,6 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
           integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script>
-        if (navigator.userAgent.match(/IEMobile\/10\.0/)) //TODO: not sure of this or also "IE 10.0"
-            document.write('<link href="https://getbootstrap.com/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">');
-    </script>
-
     <!-- Custom styles for this template -->
     <link href="css/style.css" rel="stylesheet">
 
@@ -105,11 +99,6 @@
                 </li>
             </ul>
             -->
-
-            <div class="pull-right" style="padding-top:14px">
-                <div class="fb-like" data-href="https://www.facebook.com/osmcz" data-layout="button_count"
-                     data-action="like" data-show-faces="false" data-share="false"></div>
-            </div>
 
         </div>
         <!-- /.navbar-collapse -->
@@ -286,9 +275,6 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
         integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
         crossorigin="anonymous"></script>
-<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-<script src="https://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js"></script>
-
 
 <!-- ============ vendor ============ -->
 <!-- leaflet -->
@@ -355,12 +341,12 @@
 <!-- ============ app ============ -->
 <link href="css/map-style.css" rel="stylesheet">
 
+<script src="js/osmcz-config.js"></script>
 <script src="js/osm-notes-layer.js"></script>
 <script src="js/lib-gps-formats-convert.js"></script>
 <script src="js/layers.js"></script>
 <script src="js/layer-switcher.js"></script>
 <script src="js/controls.js"></script>
-<script src="js/note.js"></script>
 <script src="js/photoDB-gui.js"></script>
 <script src="js/guideposts.js"></script>
 <script src="js/gp-check.js"></script>
@@ -370,19 +356,6 @@
 <script src="js/active-layer.js"></script>
 <script src="js/osmcz.js"></script>
 <!-- ============ /app ============ -->
-
-
-<div id="fb-root"></div>
-<script>(function (d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0];
-    if (d.getElementById(id)) return;
-    js = d.createElement(s);
-    js.id = id;
-    js.src = "//connect.facebook.net/en_GB/all.js#xfbml=1&appId=515622781853695";
-    fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));
-</script>
-
 
 </body>
 </html>
