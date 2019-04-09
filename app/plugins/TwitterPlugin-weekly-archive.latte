@@ -1,9 +1,10 @@
 <table>
 {var $year = false}
 {foreach $weeklys as $t}
-    {if $year != (new DateTime($t[created_at]))->format('Y')}
+    {var $cr = new DateTime($t[created_at])}
+    {if $year != $cr->format('Y')}
         </table>
-        {var $year = (new DateTime($t[created_at]))->format('Y')}
+        {var $year = $cr->format('Y')}
         <h4 id="y{$year}" class="jumptarget">
           {$year}
           <a href="#y{$year}" onclick="$(this).parent().next().toggle()" class="small" n:if="$iterations">zobrazit &raquo;</a>
