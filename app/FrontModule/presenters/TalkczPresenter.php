@@ -1,5 +1,11 @@
 <?php
-class Front_TalkczPresenter extends Front_BasePresenter
+
+namespace FrontModule;
+
+use dibi;
+use Nette\DateTime;
+
+class TalkczPresenter extends BasePresenter
 {
   public function startup()
   {
@@ -37,7 +43,7 @@ class Front_TalkczPresenter extends Front_BasePresenter
 
     $this->template->result = dibi::query(
       "
-                    SELECT m.conversationid, m.date last_date, m.subject, 
+                    SELECT m.conversationid, m.date last_date, m.subject,
                           (SELECT count(1) FROM mailarchive mc WHERE mc.conversationid = m.conversationid) count,
                           (SELECT name FROM mailarchive oldest WHERE oldest.conversationid = m.conversationid ORDER BY date ASC LIMIT 1) opener,
                           (SELECT `from` FROM mailarchive oldest2 WHERE oldest2.conversationid = m.conversationid ORDER BY date ASC LIMIT 1) opener_mail
@@ -66,7 +72,7 @@ class Front_TalkczPresenter extends Front_BasePresenter
                     HAVING YEAR(last_date) = 2017 AND MONTH(last_date) = 12
                     ORDER BY last_date DESC
         */
-    $month = new DateTime53();
+    $month = new DateTime();
     $month->setDate($matches[1], $matches[2], 1);
     $this->template->month = $month;
     $this->template->prev = $month->modifyClone('-1 month');
@@ -79,7 +85,7 @@ class Front_TalkczPresenter extends Front_BasePresenter
       "
                 SELECT m.*, u.*, m1.talk_cz_mails
                 FROM `mailarchive` m
-                LEFT JOIN users u ON m.`from` = u.email 
+                LEFT JOIN users u ON m.`from` = u.email
                 LEFT JOIN (SELECT count(msgid) talk_cz_mails, `from` FROM mailarchive GROUP BY `from`) m1 ON m.from = m1.from
                 WHERE m.conversationid = %i",
       $id,
@@ -115,7 +121,7 @@ class Front_TalkczPresenter extends Front_BasePresenter
                 FROM mailarchive m
                 WHERE m.from LIKE %s",
       $mailuser . "%",
-      " 
+      "
                 AND mid(md5(`from`),-5) = %s",
       $mailhash
     );
@@ -154,7 +160,7 @@ class Front_TalkczPresenter extends Front_BasePresenter
       "
             SELECT m.*, u.*, m1.talk_cz_mails
                 FROM `mailarchive` m
-                LEFT JOIN users u ON m.`from` = u.email 
+                LEFT JOIN users u ON m.`from` = u.email
                 LEFT JOIN (SELECT count(msgid) talk_cz_mails, `from` FROM mailarchive GROUP BY `from`) m1 ON m.from = m1.from
 		    WHERE MATCH(text) AGAINST (%s",
       $query,

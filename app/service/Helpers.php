@@ -1,5 +1,7 @@
 <?php
 
+use Nette\Utils\Strings;
+
 /**
  * Nette Framework Extras
  *

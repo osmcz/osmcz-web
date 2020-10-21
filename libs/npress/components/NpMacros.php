@@ -7,6 +7,10 @@
  * @package    nPress
  */
 
+use Nette\Application\IRouter;
+use Nette\Http\Request;
+use Nette\Object;
+
 /** Service for processing np-macros (#-xxx-#)
  */
 class NpMacros extends Object
@@ -21,7 +25,7 @@ class NpMacros extends Object
   function __construct(
     array $macros,
     IRouter $router,
-    HttpRequest $req,
+    Request $req,
     I18n $i18n
   ) {
     $this->router = $router;
@@ -85,7 +89,7 @@ class NpMacros extends Object
       );
 
       return $this->router->constructUrl(
-        new PresenterRequest('Front:Pages', 'GET', $params),
+        new Nette\Application\Request('Front:Pages', 'GET', $params),
         $this->url
       );
     }

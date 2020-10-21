@@ -1,5 +1,14 @@
 <?php
 
+namespace FrontModule;
+
+use dibi;
+use Nette\DateTime;
+use Nette\Diagnostics\Debugger;
+use Nette\Security\Identity;
+use OAuth;
+use OAuthException;
+
 /** Oauth 1.0 authentication
  *
  * 1. user goes to /oauth/login
@@ -12,7 +21,7 @@
  *
  * @author Pavel Zbytovský, zby.cz
  */
-class Front_OauthPresenter extends Front_BasePresenter
+class OauthPresenter extends BasePresenter
 {
   private $config;
 

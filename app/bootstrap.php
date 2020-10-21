@@ -1,5 +1,9 @@
 <?php
 
+use Nette\Application\Routers\Route;
+use Nette\Application\Routers\RouteList;
+use Nette\Templating\FileTemplate;
+
 FileTemplate::extensionMethod('timeago', function (
   $that,
   $s,

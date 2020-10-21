@@ -1,5 +1,7 @@
 <?php
 
+use Nette\Application\UI\Form;
+
 /**
  * nPress - opensource cms
  *
@@ -7,7 +9,7 @@
  * @link       http://npress.zby.cz/
  * @package    nPress
  */
-class CommunityFormPlugin extends AppForm
+class CommunityFormPlugin extends Form
 {
   static $events = array();
 

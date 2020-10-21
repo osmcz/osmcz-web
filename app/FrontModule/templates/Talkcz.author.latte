@@ -9,7 +9,7 @@
             <option>-- měsíc --</option>
             {foreach $monthList as $m}
                 <option value="{link default $m->ym}">
-                    {$m->date|date:n|czechMonth} {$m->date|date:Y} ({$m->count})
+                    {$m->date|date:'n'|czechMonth} {$m->date|date:'Y'} ({$m->count})
                 </option>
             {/foreach}
         </select>
