@@ -81,8 +81,8 @@ function insertMailsFromMbox($mbox)
     // find conversation
     $cid = dibi::fetchSingle(
       "
-          SELECT conversationid 
-          FROM mailarchive 
+          SELECT conversationid
+          FROM mailarchive
           WHERE msgid = %s",
       $e->getHeader('in-reply-to'),
       "
@@ -105,16 +105,26 @@ function insertMailsFromMbox($mbox)
       $from = "petr@pada.cz";
     }
 
-    dibi::query("INSERT INTO mailarchive", array(
-      "msgid" => $e->getHeader('message-id'),
-      "replyid" => $e->getHeader('in-reply-to'),
-      "date" => date("Y-m-d H:i:s", strtotime($e->getHeader('date'))),
-      "from" => $from,
-      "name" => $name,
-      "subject" => $subject,
-      "text" => $e->getPlainBody(),
-      "conversationid" => $cid
-    ));
+    try {
+      dibi::query("INSERT INTO mailarchive", array(
+        "msgid" => $e->getHeader('message-id'),
+        "replyid" => $e->getHeader('in-reply-to'),
+        "date" => date("Y-m-d H:i:s", strtotime($e->getHeader('date'))),
+        "from" => $from,
+        "name" => $name,
+        "subject" => $subject,
+        "text" => $e->getPlainBody(),
+        "conversationid" => $cid
+      ));
+    } catch(DibiException $e) {
+      if ($e->getCode() === 1062) {
+        echo "DUP";
+      }
+      else {
+        throw $e;
+      }
+    }
+
     echo ".";
   }
 }

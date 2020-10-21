@@ -7,12 +7,17 @@
  * @package    nPress
  */
 
+namespace FrontModule;
+
+use FilesModel;
+use Nette\Application\BadRequestException;
+
 /** Files presenter
  *
  * Works just as a service for @see File objects (link() methods)
  *
  */
-class Front_FilesPresenter extends Front_BasePresenter
+class FilesPresenter extends BasePresenter
 {
   /** Handle the file downloading
    * @param $id   contains fileid-size

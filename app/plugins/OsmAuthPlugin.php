@@ -1,5 +1,8 @@
 <?php
 
+use Nette\Application\UI\Control;
+use Nette\Utils\Strings;
+
 /**
  * nPress - opensource cms
  *

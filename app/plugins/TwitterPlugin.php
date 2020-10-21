@@ -1,5 +1,9 @@
 <?php
 
+use Nette\Application\UI\Control;
+use Nette\Diagnostics\Debugger;
+use Nette\Utils\Json;
+
 /**
  * nPress - opensource cms
  *
