@@ -117,7 +117,7 @@ class NpMacros extends Object
   {
     $template = new FileTemplate($file);
     $template->registerFilter(Environment::getNette()->createLatte());
-    $template->registerHelperLoader('TemplateHelpers::loader');
+    $template->registerHelperLoader('Nette\\Templating\\Helpers::loader');
     $template->setCacheStorage(
       Environment::getContext()->nette->templateCacheStorage
     );
