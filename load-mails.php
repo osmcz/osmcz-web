@@ -13,16 +13,24 @@ if (!function_exists('gzdecode')) {
   }
 }
 
-// get current mbox archive
-$url =
-  "https://lists.openstreetmap.org/pipermail/talk-cz/" . date('Y-F') . ".txt";
-$mbox = file_get_contents($url);
-if (!$mbox) {
-  $url .= ".gz";
-  $mbox = gzdecode(file_get_contents($url));
+if(isset($_GET['when']) && preg_match('/^[12][90][0-9][0-9]-[0-1][0-9]$/', $_GET['when'])){
+  //import for requested month
+  //can be used to import missing emails (waiting for moderator aproval on end of month
+  // run as: https://openstreetmap.cz/load-mails.php?when=2020-11
+  $url = "https://lists.openstreetmap.org/pipermail/talk-cz/" . date('Y-F', strtotime($_GET['when']."-10")) . ".txt";
+  echo "Requested import for ".$_GET['when']." from $url\n";
+} else {
+  // get current mbox archive
+  $url = "https://lists.openstreetmap.org/pipermail/talk-cz/" . date('Y-F') . ".txt";
 }
 
-insertMailsFromMbox($mbox);
+  $mbox = file_get_contents($url);
+  if (!$mbox) {
+    $url .= ".gz";
+    $mbox = gzdecode(file_get_contents($url));
+  }
+
+  insertMailsFromMbox($mbox);
 
 /*/
 set_time_limit(10*60);
